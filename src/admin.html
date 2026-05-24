@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Administrativo — Sistema de Denuncias</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="icon-shield">🛡️</div>
+    <span>Sistema de Denuncias</span>
+  </div>
+  <div class="topbar-user">
+    <div>
+      <div class="user-name" id="topbar-nombre">—</div>
+      <div class="user-role" id="topbar-rol">—</div>
+    </div>
+    <button class="btn-logout" onclick="window.Auth.logout()">⬅ Salir</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+  <button class="tab-btn" onclick="showTab('asignacion',this)">👤 Asignación</button>
+  <button class="tab-btn" onclick="showTab('usuarios',this)">👥 Usuarios</button>
+  <button class="tab-btn" onclick="showTab('reportes',this)">📄 Reportes</button>
+  <button class="tab-btn" onclick="showTab('logs',this)">🗒️ Logs de Auditoría</button>
+</div>
+
+<!-- ── TAB: DASHBOARD ──────────────────────────────────────────────────────── -->
+<div id="tab-dashboard" class="page-content">
+  <div class="metrics-grid" id="metrics-grid"><!-- renderizado por JS --></div>
+
+  <div class="card">
+    <div class="card-title">📋 Actividad Reciente</div>
+    <div id="activity-list"><!-- renderizado por JS --></div>
+  </div>
+</div>
+
+<!-- ── TAB: ASIGNACIÓN ────────────────────────────────────────────────────── -->
+<div id="tab-asignacion" class="page-content hidden">
+  <div class="card">
+    <div class="card-title">👤 Asignación de Investigadores</div>
+    <div id="asignacion-list"><!-- renderizado por JS --></div>
+  </div>
+</div>
+
+<!-- ── TAB: USUARIOS ──────────────────────────────────────────────────────── -->
+<div id="tab-usuarios" class="page-content hidden">
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>👥 Gestión de Usuarios</span>
+      <button class="btn btn-primary btn-sm" onclick="showNewUserForm()">+ Nuevo Usuario</button>
+    </div>
+
+    <div id="alert-usuario" class="alert hidden mt-sm"></div>
+
+    <!-- Formulario nuevo usuario (oculto por defecto) -->
+    <div id="new-user-form" class="hidden" style="background:#F7FAFC;border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;">
+      <div style="font-weight:700;margin-bottom:12px;color:var(--navy);">Crear nuevo usuario</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="required">Nombre completo</label>
+          <input type="text" id="new-nombre" class="form-control" placeholder="Nombre completo">
+        </div>
+        <div class="form-group">
+          <label class="required">Usuario</label>
+          <input type="text" id="new-user" class="form-control" placeholder="nombre de usuario">
+        </div>
+        <div class="form-group">
+          <label class="required">Contraseña</label>
+          <input type="password" id="new-pass" class="form-control" placeholder="Contraseña">
+        </div>
+        <div class="form-group">
+          <label class="required">Rol</label>
+          <select id="new-rol" class="form-control">
+            <option value="">Seleccione un rol</option>
+            <option value="admin">Administrador</option>
+            <option value="recepcion">Recepción</option>
+            <option value="investigador">Investigador</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-success btn-sm" onclick="crearUsuario()">✓ Crear</button>
+        <button class="btn btn-outline btn-sm" onclick="cancelNewUser()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tabla-usuarios">
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-usuarios"><!-- renderizado por JS --></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB: REPORTES ──────────────────────────────────────────────────────── -->
+<div id="tab-reportes" class="page-content hidden">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div class="card">
+      <div class="card-title">📊 Reporte de Denuncias por Estado</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Exporta un resumen de todas las denuncias agrupadas por estado.</p>
+      <div id="reporte-estados"><!-- renderizado por JS --></div>
+      <button class="btn btn-primary btn-sm mt-md" onclick="exportarReporte()">⬇ Exportar CSV</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Reporte Mensual</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Genera el reporte mensual con estadísticas completas.</p>
+      <div id="reporte-mensual"><!-- renderizado por JS --></div>
+      <button class="btn btn-outline btn-sm mt-md" onclick="alertExport('PDF')">⬇ Exportar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB: LOGS ───────────────────────────────────────────────────────────── -->
+<div id="tab-logs" class="page-content hidden">
+  <div class="card">
+    <div class="card-title">🗒️ Logs de Auditoría</div>
+    <p class="text-muted mt-sm" style="font-size:12px;margin-bottom:16px;">Registro inmutable de todas las acciones realizadas en el sistema.</p>
+
+    <div class="log-row log-header">
+      <span>Fecha / Hora</span>
+      <span>Usuario</span>
+      <span>Acción</span>
+      <span>Detalle</span>
+    </div>
+    <div id="logs-list"><!-- renderizado por JS --></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script>
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+const user = window.Auth.requireLogin(['admin', 'investigador']);
+if (user) {
+  document.getElementById('topbar-nombre').textContent = user.nombre;
+  document.getElementById('topbar-rol').textContent =
+    user.rol === 'admin' ? 'Administrador' : 'Investigador';
+  renderDashboard();
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  btn.classList.add('active');
+  if (name === 'dashboard')  renderDashboard();
+  if (name === 'asignacion') renderAsignacion();
+  if (name === 'usuarios')   renderUsuarios();
+  if (name === 'reportes')   renderReportes();
+  if (name === 'logs')       renderLogs();
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const lista = window.DB.denuncias;
+  const total     = lista.length;
+  const nuevas    = lista.filter(d => d.estado === 'Nueva').length;
+  const investig  = lista.filter(d => d.estado === 'En Investigación').length;
+  const resueltas = lista.filter(d => d.estado === 'Resuelta').length;
+
+  document.getElementById('metrics-grid').innerHTML = `
+    <div class="metric-card total">
+      <div><div class="metric-num">${total}</div><div class="metric-label">Total Denuncias</div></div>
+      <div class="metric-icon">📋</div>
+    </div>
+    <div class="metric-card pending">
+      <div><div class="metric-num">${nuevas}</div><div class="metric-label">Pendientes</div></div>
+      <div class="metric-icon">⏳</div>
+    </div>
+    <div class="metric-card invest">
+      <div><div class="metric-num">${investig}</div><div class="metric-label">En Investigación</div></div>
+      <div class="metric-icon">🔍</div>
+    </div>
+    <div class="metric-card resolved">
+      <div><div class="metric-num">${resueltas}</div><div class="metric-label">Resueltas</div></div>
+      <div class="metric-icon">✅</div>
+    </div>`;
+
+  const logs = window.DB.logs.slice(0, 5);
+  document.getElementById('activity-list').innerHTML = logs.map(l => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <div class="log-action log-${l.accion.toLowerCase()}" style="width:100px;text-align:center;">${l.accion}</div>
+      <div style="color:var(--navy-mid);font-weight:600;min-width:110px;">${l.usuario}</div>
+      <div style="color:var(--text-muted);">${l.fecha}</div>
+      <div style="color:var(--text);">${l.detalle}</div>
+    </div>`).join('');
+}
+
+// ─── ASIGNACIÓN ───────────────────────────────────────────────────────────────
+function renderAsignacion() {
+  const lista = window.DB.denuncias.filter(d => !d.investigador || d.estado === 'Nueva');
+  if (!lista.length) {
+    document.getElementById('asignacion-list').innerHTML =
+      '<div class="alert alert-success">✅ Todas las denuncias tienen investigador asignado.</div>';
+    return;
+  }
+  document.getElementById('asignacion-list').innerHTML = lista.map(d => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:#FAFAFA;">
+      <div>
+        <span class="code-cell">${d.codigo}</span> &nbsp;
+        <span style="font-weight:600;">${d.denunciante}</span>
+        <span style="font-size:11px;color:var(--text-muted);margin-left:8px;">${d.fecha}</span>
+        <div style="font-size:12px;color:var(--text-soft);margin-top:4px;">${d.categoria} · ${window.Utils.gravedad(d.gravedad)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${window.Utils.estadoBadge(d.estado)}
+        <select id="sel-${d.codigo}" class="form-control" style="width:180px;">
+          <option value="">Seleccionar investigador</option>
+          <option value="investigador1">Juan Investigador</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="asignar('${d.codigo}')">Asignar</button>
+      </div>
+    </div>`).join('');
+}
+
+function asignar(codigo) {
+  const sel = document.getElementById('sel-' + codigo);
+  if (!sel.value) { alert('Seleccione un investigador.'); return; }
+  const lista = window.DB.denuncias;
+  const idx = lista.findIndex(d => d.codigo === codigo);
+  lista[idx].investigador = sel.value;
+  lista[idx].estado = 'Asignada';
+  window.DB.denuncias = lista;
+  window.Utils.addLog(user.user, 'Asignación', `${codigo} asignada a ${sel.value}`);
+  renderAsignacion();
+  alert(`✅ ${codigo} asignada correctamente a ${sel.value}.`);
+}
+
+// ─── USUARIOS ─────────────────────────────────────────────────────────────────
+const extraUsuarios = [];
+function renderUsuarios() {
+  const todos = [
+    { nombre:'Administrador Principal', user:'admin',         rol:'admin',        activo:true  },
+    { nombre:'Fiscal Auxiliar',         user:'recepcion',     rol:'recepcion',    activo:true  },
+    { nombre:'Juan Investigador',       user:'investigador1', rol:'investigador', activo:true  },
+    ...extraUsuarios,
+  ];
+  document.getElementById('tbody-usuarios').innerHTML = todos.map(u => `
+    <tr>
+      <td>${u.nombre}</td>
+      <td class="font-mono" style="font-size:12px;">${u.user}</td>
+      <td><span class="badge badge-${u.rol}">${rolLabel(u.rol)}</span></td>
+      <td><span class="badge" style="background:${u.activo?'#D1FAE5':'#FEE2E2'};color:${u.activo?'#065F46':'#991B1B'};">${u.activo?'Activo':'Inactivo'}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="toggleUser('${u.user}', ${u.activo})">${u.activo?'Desactivar':'Activar'}</button></td>
+    </tr>`).join('');
+}
+
+function rolLabel(r) {
+  return { admin:'Admin', recepcion:'Recepción', investigador:'Investigador' }[r] || r;
+}
+
+function toggleUser(uname, activo) {
+  const idx = extraUsuarios.findIndex(u => u.user === uname);
+  if (idx >= 0) { extraUsuarios[idx].activo = !activo; }
+  window.Utils.addLog(user.user, 'Estado', `Usuario ${uname} → ${activo?'Desactivado':'Activado'}`);
+  document.getElementById('alert-usuario').className = 'alert alert-success';
+  document.getElementById('alert-usuario').textContent = `✅ Usuario ${uname} ${activo?'desactivado':'activado'} correctamente.`;
+  document.getElementById('alert-usuario').classList.remove('hidden');
+  renderUsuarios();
+  setTimeout(() => document.getElementById('alert-usuario').classList.add('hidden'), 3000);
+}
+
+function showNewUserForm() {
+  document.getElementById('new-user-form').classList.toggle('hidden');
+}
+function cancelNewUser() {
+  document.getElementById('new-user-form').classList.add('hidden');
+}
+function crearUsuario() {
+  const nombre = document.getElementById('new-nombre').value.trim();
+  const uname  = document.getElementById('new-user').value.trim();
+  const pass   = document.getElementById('new-pass').value.trim();
+  const rol    = document.getElementById('new-rol').value;
+  if (!nombre || !uname || !pass || !rol) {
+    alert('Todos los campos son obligatorios.'); return;
+  }
+  extraUsuarios.push({ nombre, user: uname, rol, activo: true });
+  window.Utils.addLog(user.user, 'Usuario', `Nuevo usuario creado: ${uname} (${rol})`);
+  cancelNewUser();
+  renderUsuarios();
+  document.getElementById('alert-usuario').className = 'alert alert-success';
+  document.getElementById('alert-usuario').textContent = `✅ Usuario ${uname} creado correctamente.`;
+  document.getElementById('alert-usuario').classList.remove('hidden');
+  setTimeout(() => document.getElementById('alert-usuario').classList.add('hidden'), 3000);
+}
+
+// ─── REPORTES ─────────────────────────────────────────────────────────────────
+function renderReportes() {
+  const lista = window.DB.denuncias;
+  const stats = {};
+  lista.forEach(d => { stats[d.estado] = (stats[d.estado] || 0) + 1; });
+  const colores = { 'Nueva':'#DBEAFE', 'Asignada':'#FEF3C7', 'En Investigación':'#EDE9FE', 'Resuelta':'#D1FAE5', 'Archivada':'#F3F4F6' };
+  document.getElementById('reporte-estados').innerHTML = Object.entries(stats).map(([e, n]) =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:${colores[e]||'#eee'};border-radius:6px;margin-bottom:8px;">
+      <span style="font-weight:600;font-size:13px;">${e}</span>
+      <span style="font-weight:700;font-size:20px;">${n}</span>
+    </div>`).join('');
+
+  const categorias = {};
+  lista.forEach(d => { categorias[d.categoria] = (categorias[d.categoria] || 0) + 1; });
+  document.getElementById('reporte-mensual').innerHTML = Object.entries(categorias).map(([c, n]) =>
+    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <span>${c}</span><span style="font-weight:700;">${n}</span>
+    </div>`).join('');
+}
+
+function exportarReporte() {
+  const lista = window.DB.denuncias;
+  let csv = 'Código,Denunciante,Categoría,Gravedad,Estado,Fecha\n';
+  lista.forEach(d => {
+    csv += `${d.codigo},${d.denunciante},${d.categoria},${d.gravedad},${d.estado},${d.fecha}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'reporte_denuncias.csv'; a.click();
+  window.Utils.addLog(user.user, 'Reporte', 'Exportación CSV de denuncias generada');
+}
+
+function alertExport(tipo) {
+  alert(`✅ Reporte ${tipo} generado. En un sistema productivo se descargaría automáticamente.`);
+  window.Utils.addLog(user.user, 'Reporte', `Reporte ${tipo} mensual generado`);
+}
+
+// ─── LOGS ─────────────────────────────────────────────────────────────────────
+function renderLogs() {
+  const logs = window.DB.logs;
+  const accionClass = {
+    'Login':'log-login','Registro':'log-registro','Asignación':'log-asignacion',
+    'Evidencia':'log-evidencia','Estado':'log-estado','Reporte':'log-asignacion',
+    'Usuario':'log-registro',
+  };
+  document.getElementById('logs-list').innerHTML = logs.map(l => `
+    <div class="log-row">
+      <span class="font-mono" style="font-size:11px;">${l.fecha}</span>
+      <span style="font-weight:600;color:var(--navy-mid);">${l.usuario}</span>
+      <span><span class="log-action ${accionClass[l.accion]||'log-login'}">${l.accion}</span></span>
+      <span style="color:var(--text-soft);">${l.detalle}</span>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

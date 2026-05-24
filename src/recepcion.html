@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Recepción — Sistema de Denuncias</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="icon-shield">🛡️</div>
+    <span>Panel de Recepción</span>
+  </div>
+  <div class="topbar-user">
+    <div>
+      <div class="user-name" id="topbar-nombre">—</div>
+      <div class="user-role">Fiscal Auxiliar</div>
+    </div>
+    <button class="btn-logout" onclick="window.Auth.logout()">⬅ Salir</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('registrar',this)">➕ Registrar Denuncia</button>
+  <button class="tab-btn" onclick="showTab('consultar',this)">🔍 Consultar Denuncias</button>
+</div>
+
+<!-- ── TAB: REGISTRAR ─────────────────────────────────────────────────────── -->
+<div id="tab-registrar" class="page-content">
+  <div class="card" style="max-width:780px;">
+    <div class="card-title">➕ Nueva Denuncia</div>
+
+    <div id="alert-reg" class="alert hidden"></div>
+
+    <label class="anon-toggle">
+      <input type="checkbox" id="chk-anonima" onchange="toggleAnonima()">
+      🔒 Denuncia Anónima — Si marca esta opción, no se requerirán datos personales
+    </label>
+
+    <!-- Datos del denunciante -->
+    <div id="bloque-identidad">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="nombre" class="required">Nombre Completo</label>
+          <input type="text" id="nombre" class="form-control" placeholder="Nombre y apellidos">
+          <div class="field-error hidden" id="err-nombre">Este campo es obligatorio.</div>
+        </div>
+        <div class="form-group">
+          <label for="dui" class="required">DUI</label>
+          <input type="text" id="dui" class="form-control" placeholder="00000000-0" maxlength="10">
+          <div class="field-error hidden" id="err-dui">Ingrese un DUI válido (formato: 00000000-0).</div>
+        </div>
+        <div class="form-group">
+          <label for="correo">Correo Electrónico</label>
+          <input type="email" id="correo" class="form-control" placeholder="correo@ejemplo.com">
+          <div class="field-error hidden" id="err-correo">Formato de correo inválido.</div>
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input type="text" id="telefono" class="form-control" placeholder="7000-0000" maxlength="9">
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de la denuncia -->
+    <div class="form-group">
+      <label for="descripcion" class="required">Descripción de los Hechos</label>
+      <textarea id="descripcion" class="form-control" rows="4" placeholder="Describa detalladamente los hechos denunciados..."></textarea>
+      <div class="field-error hidden" id="err-descripcion">La descripción es obligatoria (mínimo 20 caracteres).</div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label for="categoria" class="required">Categoría</label>
+        <select id="categoria" class="form-control">
+          <option value="">Seleccione una categoría</option>
+          <option>Laboral</option>
+          <option>Familiar / Violencia</option>
+          <option>Penal / Delitos</option>
+          <option>Derechos Humanos</option>
+          <option>Atención Psicosocial</option>
+          <option>Corrupción / Fraude</option>
+          <option>Otra</option>
+        </select>
+        <div class="field-error hidden" id="err-categoria">Seleccione una categoría.</div>
+      </div>
+      <div class="form-group">
+        <label for="gravedad" class="required">Nivel de Gravedad</label>
+        <select id="gravedad" class="form-control">
+          <option value="">Seleccione gravedad</option>
+          <option value="alta">🔴 Alta</option>
+          <option value="media">🟡 Media</option>
+          <option value="baja">🟢 Baja</option>
+        </select>
+        <div class="field-error hidden" id="err-gravedad">Seleccione el nivel de gravedad.</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Evidencias (opcional)</label>
+      <input type="file" id="evidencias" class="form-control" multiple accept=".jpg,.jpeg,.png,.pdf,.mp4,.mp3">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Formatos: JPG, PNG, PDF, MP4, MP3 — Máx. 10 MB por archivo</div>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" onclick="registrarDenuncia()">💾 Registrar Denuncia</button>
+      <button class="btn btn-outline" onclick="limpiarFormulario()">🗑 Limpiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAB: CONSULTAR ─────────────────────────────────────────────────────── -->
+<div id="tab-consultar" class="page-content hidden">
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>🔍 Denuncias Registradas</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="busqueda" class="form-control" style="width:240px;" placeholder="Buscar por código o nombre..." oninput="filtrar()">
+        <select id="filtro-estado" class="form-control" style="width:160px;" onchange="filtrar()">
+          <option value="">Todos los estados</option>
+          <option>Nueva</option>
+          <option>Asignada</option>
+          <option>En Investigación</option>
+          <option>Resuelta</option>
+          <option>Archivada</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Código</th><th>Fecha</th><th>Denunciante</th><th>Categoría</th><th>Gravedad</th><th>Estado</th><th>Evidencias</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tbody-denuncias"><!-- renderizado por JS --></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL detalle -->
+<div id="modal-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:28px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.25);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-weight:700;font-size:16px;color:var(--navy);" id="modal-titulo">Detalle</span>
+      <button onclick="cerrarModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">✕</button>
+    </div>
+    <div id="modal-body"><!-- contenido --></div>
+    <div class="flex gap-sm mt-md" id="modal-acciones"><!-- acciones --></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script>
+const user = window.Auth.requireLogin(['recepcion', 'admin']);
+if (user) {
+  document.getElementById('topbar-nombre').textContent = user.nombre;
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  btn.classList.add('active');
+  if (name === 'consultar') renderDenuncias(window.DB.denuncias);
+}
+
+// ─── FORMULARIO ───────────────────────────────────────────────────────────────
+function toggleAnonima() {
+  const anonima = document.getElementById('chk-anonima').checked;
+  document.getElementById('bloque-identidad').style.opacity = anonima ? '.35' : '1';
+  document.getElementById('bloque-identidad').style.pointerEvents = anonima ? 'none' : '';
+}
+
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(e => e.classList.add('hidden'));
+  document.querySelectorAll('.form-control').forEach(e => e.classList.remove('error'));
+}
+
+function showError(id, inputId) {
+  document.getElementById(id).classList.remove('hidden');
+  if (inputId) document.getElementById(inputId).classList.add('error');
+}
+
+function registrarDenuncia() {
+  clearErrors();
+  const anonima    = document.getElementById('chk-anonima').checked;
+  const nombre     = document.getElementById('nombre').value.trim();
+  const dui        = document.getElementById('dui').value.trim();
+  const correo     = document.getElementById('correo').value.trim();
+  const telefono   = document.getElementById('telefono').value.trim();
+  const descripcion= document.getElementById('descripcion').value.trim();
+  const categoria  = document.getElementById('categoria').value;
+  const gravedad   = document.getElementById('gravedad').value;
+  let valid = true;
+
+  if (!anonima) {
+    if (!nombre) { showError('err-nombre', 'nombre'); valid = false; }
+    const duiReg = /^\d{8}-\d$/;
+    if (!dui || !duiReg.test(dui)) { showError('err-dui', 'dui'); valid = false; }
+    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { showError('err-correo', 'correo'); valid = false; }
+  }
+  if (descripcion.length < 20) { showError('err-descripcion', 'descripcion'); valid = false; }
+  if (!categoria) { showError('err-categoria', 'categoria'); valid = false; }
+  if (!gravedad)  { showError('err-gravedad', 'gravedad'); valid = false; }
+
+  if (!valid) {
+    document.getElementById('alert-reg').className = 'alert alert-error';
+    document.getElementById('alert-reg').textContent = '⚠️ Por favor corrija los campos marcados en rojo.';
+    document.getElementById('alert-reg').classList.remove('hidden');
+    return;
+  }
+
+  const archivos = document.getElementById('evidencias').files;
+  const codigo = window.Utils.nextCodigo();
+  const lista  = window.DB.denuncias;
+
+  lista.push({
+    codigo,
+    fiscal: user.user,
+    denunciante: anonima ? 'ANÓNIMO' : nombre,
+    dui: anonima ? '' : dui,
+    correo: anonima ? '' : correo,
+    telefono: anonima ? '' : telefono,
+    descripcion,
+    categoria,
+    gravedad,
+    estado: 'Nueva',
+    anonima,
+    investigador: null,
+    evidencias: archivos.length,
+    fecha: new Date().toISOString().slice(0, 10),
+  });
+  window.DB.denuncias = lista;
+  window.Utils.addLog(user.user, 'Registro', `Denuncia ${codigo} registrada`);
+
+  document.getElementById('alert-reg').className = 'alert alert-success';
+  document.getElementById('alert-reg').innerHTML =
+    `✅ Denuncia registrada exitosamente.<br>Código de seguimiento: <strong class="font-mono">${codigo}</strong>`;
+  document.getElementById('alert-reg').classList.remove('hidden');
+  limpiarFormulario(false);
+  setTimeout(() => document.getElementById('alert-reg').classList.add('hidden'), 8000);
+}
+
+function limpiarFormulario(clearAlert = true) {
+  ['nombre','dui','correo','telefono','descripcion'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('categoria').value = '';
+  document.getElementById('gravedad').value  = '';
+  document.getElementById('chk-anonima').checked = false;
+  toggleAnonima();
+  clearErrors();
+  if (clearAlert) document.getElementById('alert-reg').classList.add('hidden');
+}
+
+// ─── TABLA DENUNCIAS ──────────────────────────────────────────────────────────
+function renderDenuncias(lista) {
+  document.getElementById('tbody-denuncias').innerHTML = lista.map(d => `
+    <tr>
+      <td class="code-cell">${d.codigo}</td>
+      <td>${d.fecha}</td>
+      <td>${d.anonima ? '<span style="color:var(--text-muted);font-style:italic;">Anónimo</span>' : d.denunciante}</td>
+      <td style="font-size:12px;">${d.categoria}</td>
+      <td style="font-size:12px;">${window.Utils.gravedad(d.gravedad)}</td>
+      <td>${window.Utils.estadoBadge(d.estado)}</td>
+      <td style="text-align:center;">${d.evidencias}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="verDetalle('${d.codigo}')">Ver</button>
+        <button class="btn btn-primary btn-sm" onclick="agregarEvidencia('${d.codigo}')">📎 Agregar</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filtrar() {
+  const q = document.getElementById('busqueda').value.toLowerCase();
+  const e = document.getElementById('filtro-estado').value;
+  const lista = window.DB.denuncias.filter(d =>
+    (!q || d.codigo.toLowerCase().includes(q) || d.denunciante.toLowerCase().includes(q)) &&
+    (!e || d.estado === e)
+  );
+  renderDenuncias(lista);
+}
+
+// ─── MODAL DETALLE ────────────────────────────────────────────────────────────
+function verDetalle(codigo) {
+  const d = window.DB.denuncias.find(x => x.codigo === codigo);
+  if (!d) return;
+  document.getElementById('modal-titulo').textContent = `Denuncia ${d.codigo}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="result-box">
+      <div class="result-row"><span class="lbl">Estado</span><span>${window.Utils.estadoBadge(d.estado)}</span></div>
+      <div class="result-row"><span class="lbl">Categoría</span><span>${d.categoria}</span></div>
+      <div class="result-row"><span class="lbl">Gravedad</span><span>${window.Utils.gravedad(d.gravedad)}</span></div>
+      <div class="result-row"><span class="lbl">Denunciante</span><span>${d.anonima ? '🔒 Anónimo' : d.denunciante}</span></div>
+      ${!d.anonima ? `<div class="result-row"><span class="lbl">DUI</span><span class="font-mono">${d.dui}</span></div>` : ''}
+      <div class="result-row"><span class="lbl">Fecha</span><span>${d.fecha}</span></div>
+      <div class="result-row"><span class="lbl">Evidencias</span><span>${d.evidencias} archivos</span></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Descripción</div>
+        <div style="font-size:13px;line-height:1.7;">${d.descripcion}</div>
+      </div>
+    </div>`;
+  document.getElementById('modal-acciones').innerHTML = `
+    <select id="nuevo-estado" class="form-control" style="width:180px;">
+      <option value="">Cambiar estado...</option>
+      <option>Nueva</option><option>Asignada</option>
+      <option>En Investigación</option><option>Resuelta</option><option>Archivada</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="cambiarEstado('${d.codigo}')">Actualizar</button>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+function cambiarEstado(codigo) {
+  const nuevoEstado = document.getElementById('nuevo-estado').value;
+  if (!nuevoEstado) { alert('Seleccione un estado.'); return; }
+  const lista = window.DB.denuncias;
+  const idx = lista.findIndex(d => d.codigo === codigo);
+  const anterior = lista[idx].estado;
+  lista[idx].estado = nuevoEstado;
+  window.DB.denuncias = lista;
+  window.Utils.addLog(user.user, 'Estado', `${codigo}: ${anterior} → ${nuevoEstado}`);
+  cerrarModal();
+  renderDenuncias(window.DB.denuncias);
+  alert(`✅ Estado de ${codigo} actualizado a "${nuevoEstado}".`);
+}
+
+function agregarEvidencia(codigo) {
+  const lista = window.DB.denuncias;
+  const idx = lista.findIndex(d => d.codigo === codigo);
+  lista[idx].evidencias += 1;
+  window.DB.denuncias = lista;
+  window.Utils.addLog(user.user, 'Evidencia', `Evidencia agregada a ${codigo}`);
+  filtrar();
+  alert(`✅ Evidencia registrada para ${codigo}.`);
+}
+</script>
+</body>
+</html>

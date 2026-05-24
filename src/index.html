@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Denuncias — Iniciar Sesión</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="login-page">
+  <!-- Lado izquierdo decorativo -->
+  <div class="login-left">
+    <div class="login-shield">🛡️</div>
+    <h1>Sistema de Denuncias y Seguimiento</h1>
+    <p>Plataforma segura para la gestión de denuncias ciudadanas con trazabilidad completa y protección del denunciante.</p>
+    <div class="login-tags">
+      <span class="login-tag">🔒 Anonimato garantizado</span>
+      <span class="login-tag">📋 Trazabilidad total</span>
+      <span class="login-tag">⚡ Notificaciones automáticas</span>
+      <span class="login-tag">🏛️ FGR El Salvador</span>
+    </div>
+  </div>
+
+  <!-- Formulario de login -->
+  <div class="login-right">
+    <h2>Iniciar Sesión</h2>
+    <p class="subtitle">Acceso exclusivo para personal autorizado de la institución.</p>
+
+    <div id="alert-login" class="alert alert-error hidden" role="alert"></div>
+
+    <div class="form-group">
+      <label for="usuario" class="required">Usuario</label>
+      <input type="text" id="usuario" class="form-control" placeholder="Ingrese su usuario" autocomplete="username">
+      <div class="field-error hidden" id="err-usuario">El usuario es obligatorio.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="password" class="required">Contraseña</label>
+      <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" autocomplete="current-password">
+      <div class="field-error hidden" id="err-password">La contraseña es obligatoria.</div>
+    </div>
+
+    <button class="btn btn-primary w-full btn-lg" onclick="doLogin()" id="btn-login">
+      🔐 Iniciar Sesión
+    </button>
+
+    <div class="login-link mt-md">
+      ¿Desea consultar el estado de su denuncia?
+      <a href="consulta.html">Consulta pública →</a>
+    </div>
+
+    <div class="demo-users">
+      <strong>Usuarios de prueba</strong>
+      <div>👤 Admin: <b>admin</b> / admin123</div>
+      <div>📋 Recepción: <b>recepcion</b> / recep123</div>
+      <div>🔍 Investigador: <b>investigador1</b> / invest123</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script>
+  // Si ya está logueado, redirigir al panel correcto
+  const usr = window.Auth.currentUser();
+  if (usr) {
+    redirectByRole(usr.rol);
+  }
+
+  function redirectByRole(rol) {
+    if (rol === 'admin' || rol === 'investigador') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'recepcion.html';
+    }
+  }
+
+  function doLogin() {
+    const usuario  = document.getElementById('usuario').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const alert    = document.getElementById('alert-login');
+    let valid = true;
+
+    // Limpiar errores previos
+    document.getElementById('err-usuario').classList.add('hidden');
+    document.getElementById('err-password').classList.add('hidden');
+    document.getElementById('usuario').classList.remove('error');
+    document.getElementById('password').classList.remove('error');
+    alert.classList.add('hidden');
+
+    // Validaciones
+    if (!usuario) {
+      document.getElementById('err-usuario').classList.remove('hidden');
+      document.getElementById('usuario').classList.add('error');
+      valid = false;
+    }
+    if (!password) {
+      document.getElementById('err-password').classList.remove('hidden');
+      document.getElementById('password').classList.add('error');
+      valid = false;
+    }
+    if (!valid) return;
+
+    // Intentar login
+    const user = window.Auth.login(usuario, password);
+    if (!user) {
+      alert.textContent = '❌ Usuario o contraseña incorrectos. Verifique sus credenciales.';
+      alert.classList.remove('hidden');
+      document.getElementById('usuario').classList.add('error');
+      document.getElementById('password').classList.add('error');
+      return;
+    }
+
+    // Login exitoso
+    window.Utils.addLog(usuario, 'Login', 'Inicio de sesión exitoso');
+    alert.className = 'alert alert-success';
+    alert.textContent = `✅ Bienvenido, ${user.nombre}. Redirigiendo...`;
+    alert.classList.remove('hidden');
+
+    setTimeout(() => redirectByRole(user.rol), 900);
+  }
+
+  // Enter para submit
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>
