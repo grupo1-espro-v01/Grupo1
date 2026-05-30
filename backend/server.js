@@ -23,6 +23,8 @@ const asignacionRoutes = require('./src/routes/asignacionRoutes');
 app.use('/api', asignacionRoutes);
 const auditoriaRoutes = require('./src/routes/auditoriaRoutes');
 app.use('/api/auditoria', auditoriaRoutes);
+const evidenciasRoutes = require('./src/routes/evidenciasRoutes');
+app.use('/api/evidencias', evidenciasRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
