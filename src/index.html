@@ -51,73 +51,52 @@
 
     <div class="demo-users">
       <strong>Usuarios de prueba</strong>
-      <div>👤 Admin: <b>admin</b> / admin123</div>
-      <div>📋 Recepción: <b>recepcion</b> / recep123</div>
-      <div>🔍 Investigador: <b>investigador1</b> / invest123</div>
+      <div>👤 Admin: <b>admin@fgr.gob.sv</b> / Admin123!</div>
+      <div>📋 Recepción: <b>fiscal1@fgr.gob.sv</b> / Fiscal123!</div>
+      <div>🔍 Investigador: <b>investigador1@fgr.gob.sv</b> / Invest123!</div>
     </div>
   </div>
 </div>
 
-<script src="js/data.js"></script>
+<script src="js/api.js"></script>
 <script>
-  // Si ya está logueado, redirigir al panel correcto
-  const usr = window.Auth.currentUser();
-  if (usr) {
-    redirectByRole(usr.rol);
-  }
-
-  function redirectByRole(rol) {
-    if (rol === 'admin' || rol === 'investigador') {
-      window.location.href = 'admin.html';
-    } else {
-      window.location.href = 'recepcion.html';
+  window.addEventListener('DOMContentLoaded', () => {
+    const usr = Auth.currentUser();
+    if (usr) {
+      window.location.href = usr.rol === 'recepcion' ? 'recepcion.html' : 'admin.html';
     }
-  }
+  });
 
-  function doLogin() {
-    const usuario  = document.getElementById('usuario').value.trim();
+  async function doLogin() {
+    const email    = document.getElementById('usuario').value.trim();
     const password = document.getElementById('password').value.trim();
-    const alert    = document.getElementById('alert-login');
-    let valid = true;
+    const alertEl  = document.getElementById('alert-login');
 
-    // Limpiar errores previos
     document.getElementById('err-usuario').classList.add('hidden');
     document.getElementById('err-password').classList.add('hidden');
-    document.getElementById('usuario').classList.remove('error');
-    document.getElementById('password').classList.remove('error');
-    alert.classList.add('hidden');
+    alertEl.classList.add('hidden');
 
-    // Validaciones
-    if (!usuario) {
-      document.getElementById('err-usuario').classList.remove('hidden');
-      document.getElementById('usuario').classList.add('error');
-      valid = false;
+    if (!email)    { document.getElementById('err-usuario').classList.remove('hidden'); return; }
+    if (!password) { document.getElementById('err-password').classList.remove('hidden'); return; }
+
+    try {
+      const data = await Auth.login(email, password);
+      alertEl.className = 'alert alert-success';
+      alertEl.textContent = `✅ Bienvenido, ${data.usuario.nombre}. Redirigiendo...`;
+      alertEl.classList.remove('hidden');
+      setTimeout(() => {
+        window.location.href = data.usuario.rol === 'recepcion' ? 'recepcion.html' : 'admin.html';
+      }, 900);
+    } catch (err) {
+      alertEl.className = 'alert alert-error';
+      alertEl.textContent = `❌ ${err.message}`;
+      alertEl.classList.remove('hidden');
     }
-    if (!password) {
-      document.getElementById('err-password').classList.remove('hidden');
-      document.getElementById('password').classList.add('error');
-      valid = false;
-    }
-    if (!valid) return;
-
-    // Intentar login
-    const user = window.Auth.login(usuario, password);
-    if (!user) {
-      alert.textContent = '❌ Usuario o contraseña incorrectos. Verifique sus credenciales.';
-      alert.classList.remove('hidden');
-      document.getElementById('usuario').classList.add('error');
-      document.getElementById('password').classList.add('error');
-      return;
-    }
-
-    // Login exitoso
-    window.Utils.addLog(usuario, 'Login', 'Inicio de sesión exitoso');
-    alert.className = 'alert alert-success';
-    alert.textContent = `✅ Bienvenido, ${user.nombre}. Redirigiendo...`;
-    alert.classList.remove('hidden');
-
-    setTimeout(() => redirectByRole(user.rol), 900);
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
 
   // Enter para submit
   document.addEventListener('keydown', (e) => {
