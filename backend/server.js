@@ -25,6 +25,10 @@ const auditoriaRoutes = require('./src/routes/auditoriaRoutes');
 app.use('/api/auditoria', auditoriaRoutes);
 const evidenciasRoutes = require('./src/routes/evidenciasRoutes');
 app.use('/api/evidencias', evidenciasRoutes);
+const usuariosRoutes = require('./src/routes/usuariosRoutes');
+app.use('/api/usuarios', usuariosRoutes);
+const reportesRoutes = require('./src/routes/reportesRoutes');
+app.use('/api/reportes', reportesRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
