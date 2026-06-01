@@ -1,45 +1,43 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Crear carpeta si no existe
-const uploadDir = path.join(__dirname, '../uploads/evidencias');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const esImagen = file.mimetype.startsWith('image/');
+    const esVideo  = file.mimetype.startsWith('video/');
+    return {
+      folder: `denuncias_fgr/${req.params.denuncia_id}`,
+      resource_type: esVideo ? 'video' : esImagen ? 'image' : 'raw',
+      allowed_formats: ['jpg','jpeg','png','pdf','mp4','mp3','wav'],
+    };
   },
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    const nombre = path.basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9]/g, '_');
-    cb(null, `${timestamp}_${nombre}${ext}`);
-  }
 });
 
 const fileFilter = (req, file, cb) => {
   const tiposPermitidos = [
-    'image/jpeg', 'image/png', 'image/gif',
+    'image/jpeg','image/png','image/gif',
     'application/pdf',
-    'video/mp4', 'video/avi',
-    'audio/mpeg', 'audio/wav', 'audio/mp3',
+    'video/mp4','audio/mpeg','audio/wav',
   ];
-
   if (tiposPermitidos.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Tipo de archivo no permitido. Solo JPG, PNG, PDF, MP4, MP3, WAV.'), false);
+    cb(new Error('Tipo de archivo no permitido.'), false);
   }
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB máximo
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 module.exports = upload;

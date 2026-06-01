@@ -19,7 +19,7 @@ const subirEvidencia = async (req, res) => {
       return res.status(404).json({ error: 'Denuncia no encontrada.' });
     }
 
-    const archivo_url = `/uploads/evidencias/${req.file.filename}`;
+    const archivo_url = req.file.path;
     const tipo = path.extname(req.file.originalname).slice(1).toUpperCase();
     const tamano = req.file.size;
 
