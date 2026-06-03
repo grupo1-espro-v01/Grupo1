@@ -160,16 +160,14 @@ if (user) {
   document.getElementById('topbar-nombre').textContent = user.nombre;
 }
 
-// ─── TABS ─────────────────────────────────────────────────────────────────────
 function showTab(name, btn) {
   document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.remove('hidden');
   btn.classList.add('active');
-  if (name === 'consultar') renderDenuncias(window.DB.denuncias);
+  if (name === 'consultar') cargarDenuncias();
 }
 
-// ─── FORMULARIO ───────────────────────────────────────────────────────────────
 function toggleAnonima() {
   const anonima = document.getElementById('chk-anonima').checked;
   document.getElementById('bloque-identidad').style.opacity = anonima ? '.35' : '1';
@@ -186,27 +184,26 @@ function showError(id, inputId) {
   if (inputId) document.getElementById(inputId).classList.add('error');
 }
 
-function registrarDenuncia() {
+async function registrarDenuncia() {
   clearErrors();
-  const anonima    = document.getElementById('chk-anonima').checked;
-  const nombre     = document.getElementById('nombre').value.trim();
-  const dui        = document.getElementById('dui').value.trim();
-  const correo     = document.getElementById('correo').value.trim();
-  const telefono   = document.getElementById('telefono').value.trim();
-  const descripcion= document.getElementById('descripcion').value.trim();
-  const categoria  = document.getElementById('categoria').value;
-  const gravedad   = document.getElementById('gravedad').value;
+  const anonima     = document.getElementById('chk-anonima').checked;
+  const nombre      = document.getElementById('nombre').value.trim();
+  const dui         = document.getElementById('dui').value.trim();
+  const correo      = document.getElementById('correo').value.trim();
+  const telefono    = document.getElementById('telefono').value.trim();
+  const descripcion = document.getElementById('descripcion').value.trim();
+  const categoria   = document.getElementById('categoria').value;
+  const gravedad    = document.getElementById('gravedad').value;
   let valid = true;
 
   if (!anonima) {
-    if (!nombre) { showError('err-nombre', 'nombre'); valid = false; }
-    const duiReg = /^\d{8}-\d$/;
-    if (!dui || !duiReg.test(dui)) { showError('err-dui', 'dui'); valid = false; }
-    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { showError('err-correo', 'correo'); valid = false; }
+    if (!nombre) { showError('err-nombre','nombre'); valid = false; }
+    if (!dui || !/^\d{8}-\d$/.test(dui)) { showError('err-dui','dui'); valid = false; }
+    if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { showError('err-correo','correo'); valid = false; }
   }
-  if (descripcion.length < 20) { showError('err-descripcion', 'descripcion'); valid = false; }
-  if (!categoria) { showError('err-categoria', 'categoria'); valid = false; }
-  if (!gravedad)  { showError('err-gravedad', 'gravedad'); valid = false; }
+  if (descripcion.length < 20) { showError('err-descripcion','descripcion'); valid = false; }
+  if (!categoria) { showError('err-categoria','categoria'); valid = false; }
+  if (!gravedad)  { showError('err-gravedad','gravedad'); valid = false; }
 
   if (!valid) {
     document.getElementById('alert-reg').className = 'alert alert-error';
@@ -215,39 +212,44 @@ function registrarDenuncia() {
     return;
   }
 
-  const archivos = document.getElementById('evidencias').files;
-  const codigo = window.Utils.nextCodigo();
-  const lista  = window.DB.denuncias;
+  try {
+    const body = {
+      descripcion, categoria, gravedad, anonima,
+      nombres_denunciante: anonima ? null : nombre,
+      documento_identidad: anonima ? null : dui,
+      correo_electronico:  anonima ? null : correo,
+      telefono:            anonima ? null : telefono,
+    };
 
-  lista.push({
-    codigo,
-    fiscal: user.user,
-    denunciante: anonima ? 'ANÓNIMO' : nombre,
-    dui: anonima ? '' : dui,
-    correo: anonima ? '' : correo,
-    telefono: anonima ? '' : telefono,
-    descripcion,
-    categoria,
-    gravedad,
-    estado: 'Nueva',
-    anonima,
-    investigador: null,
-    evidencias: archivos.length,
-    fecha: new Date().toISOString().slice(0, 10),
-  });
-  window.DB.denuncias = lista;
-  window.Utils.addLog(user.user, 'Registro', `Denuncia ${codigo} registrada`);
+    const result = await Denuncias.registrar(body);
 
-  document.getElementById('alert-reg').className = 'alert alert-success';
-  document.getElementById('alert-reg').innerHTML =
-    `✅ Denuncia registrada exitosamente.<br>Código de seguimiento: <strong class="font-mono">${codigo}</strong>`;
-  document.getElementById('alert-reg').classList.remove('hidden');
-  limpiarFormulario(false);
-  setTimeout(() => document.getElementById('alert-reg').classList.add('hidden'), 8000);
+    // Subir evidencias si hay
+    const archivos = document.getElementById('evidencias').files;
+    if (archivos.length > 0) {
+      for (const archivo of archivos) {
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+        await Evidencias.subir(result.id, formData);
+      }
+    }
+
+    document.getElementById('alert-reg').className = 'alert alert-success';
+    document.getElementById('alert-reg').innerHTML =
+      `✅ Denuncia registrada exitosamente.<br>Código de seguimiento: <strong class="font-mono">${result.codigo}</strong>`;
+    document.getElementById('alert-reg').classList.remove('hidden');
+    limpiarFormulario(false);
+
+  } catch (err) {
+    document.getElementById('alert-reg').className = 'alert alert-error';
+    document.getElementById('alert-reg').textContent = `❌ ${err.message}`;
+    document.getElementById('alert-reg').classList.remove('hidden');
+  }
 }
 
 function limpiarFormulario(clearAlert = true) {
-  ['nombre','dui','correo','telefono','descripcion'].forEach(id => document.getElementById(id).value = '');
+  ['nombre','dui','correo','telefono','descripcion'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
   document.getElementById('categoria').value = '';
   document.getElementById('gravedad').value  = '';
   document.getElementById('chk-anonima').checked = false;
@@ -256,89 +258,101 @@ function limpiarFormulario(clearAlert = true) {
   if (clearAlert) document.getElementById('alert-reg').classList.add('hidden');
 }
 
-// ─── TABLA DENUNCIAS ──────────────────────────────────────────────────────────
+async function cargarDenuncias() {
+  try {
+    const lista = await Denuncias.listar();
+    renderDenuncias(lista);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 function renderDenuncias(lista) {
   document.getElementById('tbody-denuncias').innerHTML = lista.map(d => `
     <tr>
-      <td class="code-cell">${d.codigo}</td>
-      <td>${d.fecha}</td>
-      <td>${d.anonima ? '<span style="color:var(--text-muted);font-style:italic;">Anónimo</span>' : d.denunciante}</td>
+      <td class="code-cell">${d.codigo_unico}</td>
+      <td>${Utils.formatFecha(d.fecha_presentacion)}</td>
+      <td>${d.anonima ? '<span style="color:var(--text-muted);font-style:italic;">Anónimo</span>' : d.nombres_denunciante || '—'}</td>
       <td style="font-size:12px;">${d.categoria}</td>
-      <td style="font-size:12px;">${window.Utils.gravedad(d.gravedad)}</td>
-      <td>${window.Utils.estadoBadge(d.estado)}</td>
-      <td style="text-align:center;">${d.evidencias}</td>
+      <td style="font-size:12px;">${Utils.gravedad(d.gravedad)}</td>
+      <td>${Utils.estadoBadge(d.estado)}</td>
+      <td style="text-align:center;">—</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="verDetalle('${d.codigo}')">Ver</button>
-        <button class="btn btn-primary btn-sm" onclick="agregarEvidencia('${d.codigo}')">📎 Agregar</button>
+        <button class="btn btn-outline btn-sm" onclick="verDetalle(${d.id},'${d.codigo_unico}')">Ver</button>
       </td>
     </tr>`).join('');
 }
 
-function filtrar() {
+async function filtrar() {
   const q = document.getElementById('busqueda').value.toLowerCase();
   const e = document.getElementById('filtro-estado').value;
-  const lista = window.DB.denuncias.filter(d =>
-    (!q || d.codigo.toLowerCase().includes(q) || d.denunciante.toLowerCase().includes(q)) &&
-    (!e || d.estado === e)
-  );
-  renderDenuncias(lista);
+  let params = '';
+  if (e) params = `?estado=${e}`;
+  try {
+    const lista = await Denuncias.listar(params);
+    const filtrada = lista.filter(d =>
+      !q || d.codigo_unico.toLowerCase().includes(q) ||
+      (d.nombres_denunciante && d.nombres_denunciante.toLowerCase().includes(q))
+    );
+    renderDenuncias(filtrada);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-// ─── MODAL DETALLE ────────────────────────────────────────────────────────────
-function verDetalle(codigo) {
-  const d = window.DB.denuncias.find(x => x.codigo === codigo);
-  if (!d) return;
-  document.getElementById('modal-titulo').textContent = `Denuncia ${d.codigo}`;
-  document.getElementById('modal-body').innerHTML = `
-    <div class="result-box">
-      <div class="result-row"><span class="lbl">Estado</span><span>${window.Utils.estadoBadge(d.estado)}</span></div>
-      <div class="result-row"><span class="lbl">Categoría</span><span>${d.categoria}</span></div>
-      <div class="result-row"><span class="lbl">Gravedad</span><span>${window.Utils.gravedad(d.gravedad)}</span></div>
-      <div class="result-row"><span class="lbl">Denunciante</span><span>${d.anonima ? '🔒 Anónimo' : d.denunciante}</span></div>
-      ${!d.anonima ? `<div class="result-row"><span class="lbl">DUI</span><span class="font-mono">${d.dui}</span></div>` : ''}
-      <div class="result-row"><span class="lbl">Fecha</span><span>${d.fecha}</span></div>
-      <div class="result-row"><span class="lbl">Evidencias</span><span>${d.evidencias} archivos</span></div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Descripción</div>
-        <div style="font-size:13px;line-height:1.7;">${d.descripcion}</div>
-      </div>
-    </div>`;
-  document.getElementById('modal-acciones').innerHTML = `
-    <select id="nuevo-estado" class="form-control" style="width:180px;">
-      <option value="">Cambiar estado...</option>
-      <option>Nueva</option><option>Asignada</option>
-      <option>En Investigación</option><option>Resuelta</option><option>Archivada</option>
-    </select>
-    <button class="btn btn-primary btn-sm" onclick="cambiarEstado('${d.codigo}')">Actualizar</button>`;
-  document.getElementById('modal-overlay').classList.remove('hidden');
+async function verDetalle(id, codigo) {
+  try {
+    const lista = await Denuncias.listar();
+    const d = lista.find(x => x.id === id);
+    if (!d) return;
+
+    document.getElementById('modal-titulo').textContent = `Denuncia ${d.codigo_unico}`;
+    document.getElementById('modal-body').innerHTML = `
+      <div class="result-box">
+        <div class="result-row"><span class="lbl">Estado</span><span>${Utils.estadoBadge(d.estado)}</span></div>
+        <div class="result-row"><span class="lbl">Categoría</span><span>${d.categoria}</span></div>
+        <div class="result-row"><span class="lbl">Gravedad</span><span>${Utils.gravedad(d.gravedad)}</span></div>
+        <div class="result-row"><span class="lbl">Denunciante</span><span>${d.anonima ? '🔒 Anónimo' : d.nombres_denunciante}</span></div>
+        ${!d.anonima && d.documento_identidad ? `<div class="result-row"><span class="lbl">DUI</span><span class="font-mono">${d.documento_identidad}</span></div>` : ''}
+        <div class="result-row"><span class="lbl">Fecha</span><span>${Utils.formatFecha(d.fecha_presentacion)}</span></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Descripción</div>
+          <div style="font-size:13px;line-height:1.7;">${d.descripcion}</div>
+        </div>
+      </div>`;
+
+    document.getElementById('modal-acciones').innerHTML = `
+      <select id="nuevo-estado" class="form-control" style="width:180px;">
+        <option value="">Cambiar estado...</option>
+        <option>Nueva</option>
+        <option>Asignada</option>
+        <option>En Investigacion</option>
+        <option>Resuelta</option>
+        <option>Archivada</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="cambiarEstado(${d.id})">Actualizar</button>`;
+
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function cerrarModal() {
   document.getElementById('modal-overlay').classList.add('hidden');
 }
 
-function cambiarEstado(codigo) {
+async function cambiarEstado(id) {
   const nuevoEstado = document.getElementById('nuevo-estado').value;
   if (!nuevoEstado) { alert('Seleccione un estado.'); return; }
-  const lista = window.DB.denuncias;
-  const idx = lista.findIndex(d => d.codigo === codigo);
-  const anterior = lista[idx].estado;
-  lista[idx].estado = nuevoEstado;
-  window.DB.denuncias = lista;
-  window.Utils.addLog(user.user, 'Estado', `${codigo}: ${anterior} → ${nuevoEstado}`);
-  cerrarModal();
-  renderDenuncias(window.DB.denuncias);
-  alert(`✅ Estado de ${codigo} actualizado a "${nuevoEstado}".`);
-}
-
-function agregarEvidencia(codigo) {
-  const lista = window.DB.denuncias;
-  const idx = lista.findIndex(d => d.codigo === codigo);
-  lista[idx].evidencias += 1;
-  window.DB.denuncias = lista;
-  window.Utils.addLog(user.user, 'Evidencia', `Evidencia agregada a ${codigo}`);
-  filtrar();
-  alert(`✅ Evidencia registrada para ${codigo}.`);
+  try {
+    await Denuncias.cambiarEstado(id, nuevoEstado);
+    cerrarModal();
+    cargarDenuncias();
+    alert(`✅ Estado actualizado a "${nuevoEstado}".`);
+  } catch (err) {
+    alert(`❌ ${err.message}`);
+  }
 }
 </script>
 </body>

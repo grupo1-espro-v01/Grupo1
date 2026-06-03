@@ -11,6 +11,13 @@ router.post('/:denuncia_id',
   subirEvidencia
 );
 
+// Pública para ciudadanos
+router.post('/publica/:denuncia_id', upload.single('archivo'), async (req, res) => {
+  req.usuario = { id: 1 };
+  const { subirEvidencia } = require('../controllers/evidenciasController');
+  return subirEvidencia(req, res);
+});
+
 router.get('/:denuncia_id', verificarToken, listarEvidencias);
 
 module.exports = router;

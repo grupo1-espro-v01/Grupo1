@@ -11,4 +11,11 @@ router.post('/', verificarToken, soloRoles('admin', 'recepcion'), registrar);
 router.get('/', verificarToken, listar);
 router.patch('/:id/estado', verificarToken, soloRoles('admin', 'recepcion'), cambiarEstado);
 
+// Pública — sin token, para ciudadanos
+router.post('/publica', async (req, res) => {
+  req.usuario = { id: 1 }; // fiscal por defecto
+  const { registrar } = require('../controllers/denunciasController');
+  return registrar(req, res);
+});
+
 module.exports = router;

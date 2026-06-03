@@ -56,13 +56,13 @@
 
 <script src="js/api.js"></script>
 <script>
-function usarCodigo(c) {
+async function usarCodigo(c) {
   document.getElementById('codigo-input').value = c;
-  consultarEstado();
+  await consultarEstado();
 }
 
-function consultarEstado() {
-  const codigo = document.getElementById('codigo-input').value.trim().toUpperCase();
+async function consultarEstado() {
+  const codigo  = document.getElementById('codigo-input').value.trim().toUpperCase();
   const alertEl = document.getElementById('alert-consulta');
   const errEl   = document.getElementById('err-codigo');
   const resEl   = document.getElementById('resultado');
@@ -78,53 +78,52 @@ function consultarEstado() {
     return;
   }
 
-  const denuncia = window.DB.denuncias.find(d => d.codigo === codigo);
+  try {
+    const d = await Denuncias.consultarPublico(codigo);
 
-  if (!denuncia) {
+    const mensajeEstado = {
+      'Nueva':            '📥 Su denuncia fue recibida y está pendiente de revisión.',
+      'Asignada':         '⚙️ Su denuncia está siendo procesada por el personal competente.',
+      'En Investigacion': '🔍 Su denuncia está en proceso de investigación activa.',
+      'Resuelta':         '✅ Su denuncia ha sido resuelta. Gracias por su colaboración.',
+      'Archivada':        '📁 Su denuncia ha sido archivada.',
+    };
+
+    const coloresEstado = {
+      'Nueva':'badge-nueva', 'Asignada':'badge-investigacion',
+      'En Investigacion':'badge-investigacion',
+      'Resuelta':'badge-resuelta', 'Archivada':'badge-archivada',
+    };
+
+    resEl.innerHTML = `
+      <div class="result-box">
+        <div class="result-row">
+          <span class="lbl">Código</span>
+          <span class="font-mono" style="font-weight:700;color:var(--navy-mid);">${d.codigo_unico}</span>
+        </div>
+        <div class="result-row">
+          <span class="lbl">Fecha de registro</span>
+          <span>${Utils.formatFecha(d.fecha_presentacion)}</span>
+        </div>
+        <div class="result-row">
+          <span class="lbl">Categoría</span>
+          <span>${d.categoria}</span>
+        </div>
+        <div class="result-status">
+          <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;">Estado actual</div>
+          <span class="badge ${coloresEstado[d.estado]||'badge-nueva'}" style="font-size:13px;padding:6px 18px;">${d.estado}</span>
+          <div style="font-size:13px;color:var(--text-soft);margin-top:10px;line-height:1.6;">${mensajeEstado[d.estado]||''}</div>
+        </div>
+      </div>`;
+    resEl.classList.remove('hidden');
+
+  } catch (err) {
     alertEl.className = 'alert alert-error';
-    alertEl.textContent = '❌ No se encontró ninguna denuncia con ese código. Verifique el código e intente nuevamente.';
+    alertEl.textContent = '❌ No se encontró ninguna denuncia con ese código. Verifique e intente nuevamente.';
     alertEl.classList.remove('hidden');
-    return;
   }
-
-  // Mensaje genérico según estado (no revela info interna)
-  const mensajeEstado = {
-    'Nueva':           '📥 Su denuncia fue recibida y está pendiente de revisión.',
-    'Asignada':        '⚙️ Su denuncia está siendo procesada por el personal competente.',
-    'En Investigación':'🔍 Su denuncia está en proceso de investigación activa.',
-    'Resuelta':        '✅ Su denuncia ha sido resuelta. Gracias por su colaboración.',
-    'Archivada':       '📁 Su denuncia ha sido archivada.',
-  };
-
-  const coloresEstado = {
-    'Nueva':'badge-nueva','Asignada':'badge-investigacion',
-    'En Investigación':'badge-investigacion','Resuelta':'badge-resuelta','Archivada':'badge-archivada',
-  };
-
-  resEl.innerHTML = `
-    <div class="result-box">
-      <div class="result-row">
-        <span class="lbl">Código</span>
-        <span class="font-mono" style="font-weight:700;color:var(--navy-mid);">${denuncia.codigo}</span>
-      </div>
-      <div class="result-row">
-        <span class="lbl">Fecha de registro</span>
-        <span>${denuncia.fecha}</span>
-      </div>
-      <div class="result-row">
-        <span class="lbl">Categoría</span>
-        <span>${denuncia.categoria}</span>
-      </div>
-      <div class="result-status">
-        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;">Estado actual</div>
-        <span class="badge ${coloresEstado[denuncia.estado]||'badge-nueva'}" style="font-size:13px;padding:6px 18px;">${denuncia.estado}</span>
-        <div style="font-size:13px;color:var(--text-soft);margin-top:10px;line-height:1.6;">${mensajeEstado[denuncia.estado]||''}</div>
-      </div>
-    </div>`;
-  resEl.classList.remove('hidden');
 }
 
-// Enter para buscar
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter') consultarEstado();
 });
