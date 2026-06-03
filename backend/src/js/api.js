@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://grupo1-production-a2cc.up.railway.app/api';
 
 const Auth = {
   async login(email, password) {
