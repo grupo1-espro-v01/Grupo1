@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta Pública — Sistema de Denuncias</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="consulta-page">
+  <!-- Header minimal -->
+  <div style="position:fixed;top:0;left:0;right:0;background:var(--navy);padding:12px 28px;display:flex;justify-content:space-between;align-items:center;z-index:100;">
+    <div style="display:flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:14px;">
+      <span>🛡️</span> Sistema de Denuncias — FGR El Salvador
+    </div>
+    <a href="index.html" style="color:#90CDF4;font-size:12px;font-weight:600;">← Acceso funcionarios</a>
+  </div>
+
+  <div style="margin-top:58px; width:100%; max-width:480px;">
+    <div class="consulta-card">
+      <div class="consulta-icon">🔍</div>
+      <h2>Consultar Estado de Denuncia</h2>
+      <p>Ingrese el código único que le fue entregado al momento de registrar su denuncia.</p>
+
+      <div id="alert-consulta" class="alert hidden"></div>
+
+      <div class="form-group" style="text-align:left;">
+        <label for="codigo-input" class="required">Código de Denuncia</label>
+        <input type="text" id="codigo-input" class="form-control font-mono"
+          placeholder="DEN-2026-XXX" style="text-transform:uppercase;letter-spacing:.05em;"
+          oninput="this.value=this.value.toUpperCase()">
+        <div class="field-error hidden" id="err-codigo">Ingrese un código válido.</div>
+      </div>
+
+      <button class="btn btn-primary w-full" onclick="consultarEstado()">🔍 Consultar Estado</button>
+
+      <div id="resultado" class="hidden"></div>
+
+      <div style="margin-top:20px;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Códigos de ejemplo</div>
+        <div class="example-codes">
+          <span class="code-pill" onclick="usarCodigo('DEN-2026-001')">DEN-2026-001</span>
+          <span class="code-pill" onclick="usarCodigo('DEN-2026-002')">DEN-2026-002</span>
+          <span class="code-pill" onclick="usarCodigo('DEN-2026-003')">DEN-2026-003</span>
+          <span class="code-pill" onclick="usarCodigo('DEN-2026-999')">DEN-2026-999</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--text-muted);">
+      🔒 Esta consulta no revela información interna del caso ni la identidad de los involucrados.
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+async function usarCodigo(c) {
+  document.getElementById('codigo-input').value = c;
+  await consultarEstado();
+}
+
+async function consultarEstado() {
+  const codigo  = document.getElementById('codigo-input').value.trim().toUpperCase();
+  const alertEl = document.getElementById('alert-consulta');
+  const errEl   = document.getElementById('err-codigo');
+  const resEl   = document.getElementById('resultado');
+
+  alertEl.classList.add('hidden');
+  errEl.classList.add('hidden');
+  resEl.classList.add('hidden');
+  document.getElementById('codigo-input').classList.remove('error');
+
+  if (!codigo || !codigo.startsWith('DEN-')) {
+    errEl.classList.remove('hidden');
+    document.getElementById('codigo-input').classList.add('error');
+    return;
+  }
+
+  try {
+    const d = await Denuncias.consultarPublico(codigo);
+
+    const mensajeEstado = {
+      'Nueva':            '📥 Su denuncia fue recibida y está pendiente de revisión.',
+      'Asignada':         '⚙️ Su denuncia está siendo procesada por el personal competente.',
+      'En Investigacion': '🔍 Su denuncia está en proceso de investigación activa.',
+      'Resuelta':         '✅ Su denuncia ha sido resuelta. Gracias por su colaboración.',
+      'Archivada':        '📁 Su denuncia ha sido archivada.',
+    };
+
+    const coloresEstado = {
+      'Nueva':'badge-nueva', 'Asignada':'badge-investigacion',
+      'En Investigacion':'badge-investigacion',
+      'Resuelta':'badge-resuelta', 'Archivada':'badge-archivada',
+    };
+
+    resEl.innerHTML = `
+      <div class="result-box">
+        <div class="result-row">
+          <span class="lbl">Código</span>
+          <span class="font-mono" style="font-weight:700;color:var(--navy-mid);">${d.codigo_unico}</span>
+        </div>
+        <div class="result-row">
+          <span class="lbl">Fecha de registro</span>
+          <span>${Utils.formatFecha(d.fecha_presentacion)}</span>
+        </div>
+        <div class="result-row">
+          <span class="lbl">Categoría</span>
+          <span>${d.categoria}</span>
+        </div>
+        <div class="result-status">
+          <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;">Estado actual</div>
+          <span class="badge ${coloresEstado[d.estado]||'badge-nueva'}" style="font-size:13px;padding:6px 18px;">${d.estado}</span>
+          <div style="font-size:13px;color:var(--text-soft);margin-top:10px;line-height:1.6;">${mensajeEstado[d.estado]||''}</div>
+        </div>
+      </div>`;
+    resEl.classList.remove('hidden');
+
+  } catch (err) {
+    alertEl.className = 'alert alert-error';
+    alertEl.textContent = '❌ No se encontró ninguna denuncia con ese código. Verifique e intente nuevamente.';
+    alertEl.classList.remove('hidden');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') consultarEstado();
+});
+</script>
+</body>
+</html>

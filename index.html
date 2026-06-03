@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Denuncias — Iniciar Sesión</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="login-page">
+  <!-- Lado izquierdo decorativo -->
+  <div class="login-left">
+    <div class="login-shield">🛡️</div>
+    <h1>Sistema de Denuncias y Seguimiento</h1>
+    <p>Plataforma segura para la gestión de denuncias ciudadanas con trazabilidad completa y protección del denunciante.</p>
+    <div class="login-tags">
+      <span class="login-tag">🔒 Anonimato garantizado</span>
+      <span class="login-tag">📋 Trazabilidad total</span>
+      <span class="login-tag">⚡ Notificaciones automáticas</span>
+      <span class="login-tag">🏛️ FGR El Salvador</span>
+    </div>
+  </div>
+
+  <!-- Formulario de login -->
+  <div class="login-right">
+    <h2>Iniciar Sesión</h2>
+    <p class="subtitle">Acceso exclusivo para personal autorizado de la institución.</p>
+
+    <div id="alert-login" class="alert alert-error hidden" role="alert"></div>
+
+    <div class="form-group">
+      <label for="usuario" class="required">Usuario</label>
+      <input type="text" id="usuario" class="form-control" placeholder="Ingrese su usuario" autocomplete="username">
+      <div class="field-error hidden" id="err-usuario">El usuario es obligatorio.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="password" class="required">Contraseña</label>
+      <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" autocomplete="current-password">
+      <div class="field-error hidden" id="err-password">La contraseña es obligatoria.</div>
+    </div>
+
+    <button class="btn btn-primary w-full btn-lg" onclick="doLogin()" id="btn-login">
+      🔐 Iniciar Sesión
+    </button>
+
+    <div class="login-link mt-md">
+      ¿Desea consultar el estado de su denuncia?
+      <a href="consulta.html">Consulta pública →</a>
+    </div>
+
+    <div class="login-link mt-md">
+        ¿Desea presentar una denuncia?
+        <a href="denuncia.html">Portal ciudadano →</a>
+    </div>
+
+    <div class="demo-users">
+      <strong>Usuarios de prueba</strong>
+      <div>👤 Admin: <b>admin@fgr.gob.sv</b> / Admin123!</div>
+      <div>📋 Recepción: <b>fiscal1@fgr.gob.sv</b> / Fiscal123!</div>
+      <div>🔍 Investigador: <b>investigador1@fgr.gob.sv</b> / Invest123!</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const usr = Auth.currentUser();
+    if (usr) {
+      window.location.href = usr.rol === 'recepcion' ? 'recepcion.html' : 'admin.html';
+    }
+  });
+
+  async function doLogin() {
+    const email    = document.getElementById('usuario').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const alertEl  = document.getElementById('alert-login');
+
+    document.getElementById('err-usuario').classList.add('hidden');
+    document.getElementById('err-password').classList.add('hidden');
+    alertEl.classList.add('hidden');
+
+    if (!email)    { document.getElementById('err-usuario').classList.remove('hidden'); return; }
+    if (!password) { document.getElementById('err-password').classList.remove('hidden'); return; }
+
+    try {
+      const data = await Auth.login(email, password);
+      alertEl.className = 'alert alert-success';
+      alertEl.textContent = `✅ Bienvenido, ${data.usuario.nombre}. Redirigiendo...`;
+      alertEl.classList.remove('hidden');
+      setTimeout(() => {
+        window.location.href = data.usuario.rol === 'recepcion' ? 'recepcion.html' : 'admin.html';
+      }, 900);
+    } catch (err) {
+      alertEl.className = 'alert alert-error';
+      alertEl.textContent = `❌ ${err.message}`;
+      alertEl.classList.remove('hidden');
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // Enter para submit
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>
