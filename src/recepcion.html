@@ -289,7 +289,7 @@ async function cargarConteoEvidencias(lista) {
     try {
       const evs = await Evidencias.listar(d.id);
       const cell = document.getElementById('ev-' + d.id);
-      if (cell) cell.textContent = evs.length;
+      if (cell) cell.textContent = evs.length > 0 ? '✅ Sí' : '❌ No';
     } catch(e) {}
   }
 }
