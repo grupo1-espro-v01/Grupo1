@@ -262,6 +262,7 @@ async function cargarDenuncias() {
   try {
     const lista = await Denuncias.listar();
     renderDenuncias(lista);
+    cargarConteoEvidencias(lista);
   } catch (err) {
     console.error(err);
   }
@@ -276,11 +277,21 @@ function renderDenuncias(lista) {
       <td style="font-size:12px;">${d.categoria}</td>
       <td style="font-size:12px;">${Utils.gravedad(d.gravedad)}</td>
       <td>${Utils.estadoBadge(d.estado)}</td>
-      <td style="text-align:center;">—</td>
+      <td style="text-align:center;" id="ev-${d.id}">—</td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="verDetalle(${d.id},'${d.codigo_unico}')">Ver</button>
       </td>
     </tr>`).join('');
+}
+
+async function cargarConteoEvidencias(lista) {
+  for (const d of lista) {
+    try {
+      const evs = await Evidencias.listar(d.id);
+      const cell = document.getElementById('ev-' + d.id);
+      if (cell) cell.textContent = evs.length;
+    } catch(e) {}
+  }
 }
 
 async function filtrar() {
