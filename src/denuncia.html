@@ -211,7 +211,7 @@ async function enviarDenuncia() {
   try {
     // Para denuncias públicas usamos un usuario fiscal por defecto
     // El backend necesita un endpoint público para esto
-    const res = await fetch('http://localhost:3000/api/denuncias/publica', {
+    const res = await fetch('https://grupo1-production-a2cc.up.railway.app/api/denuncias/publica', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -234,7 +234,7 @@ async function enviarDenuncia() {
       for (const archivo of archivos) {
         const formData = new FormData();
         formData.append('archivo', archivo);
-        await fetch(`http://localhost:3000/api/evidencias/publica/${data.id}`, {
+        await fetch(`https://grupo1-production-a2cc.up.railway.app/api/evidencias/publica/${data.id}`, {
           method: 'POST',
           body: formData
         });
