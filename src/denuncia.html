@@ -229,6 +229,7 @@ async function enviarDenuncia() {
     codigoGenerado = data.codigo;
 
     // Subir evidencias si hay
+    /*
     const archivos = document.getElementById('evidencias').files;
     if (archivos.length > 0) {
       for (const archivo of archivos) {
@@ -240,6 +241,7 @@ async function enviarDenuncia() {
         });
       }
     }
+      */
 
     // Mostrar código
     document.getElementById('codigo-display').textContent = data.codigo;
