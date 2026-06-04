@@ -228,20 +228,22 @@ async function enviarDenuncia() {
 
     codigoGenerado = data.codigo;
 
-    // Subir evidencias si hay
-    /*
-    const archivos = document.getElementById('evidencias').files;
-    if (archivos.length > 0) {
-      for (const archivo of archivos) {
-        const formData = new FormData();
-        formData.append('archivo', archivo);
-        await fetch(`https://grupo1-production-a2cc.up.railway.app/api/evidencias/publica/${data.id}`, {
-          method: 'POST',
-          body: formData
-        });
-      }
+// Subir evidencias si hay
+const archivos = document.getElementById('evidencias').files;
+if (archivos.length > 0) {
+  for (const archivo of archivos) {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    try {
+      await fetch(`https://grupo1-production-a2cc.up.railway.app/api/evidencias/publica/${data.id}`, {
+        method: 'POST',
+        body: formData
+      });
+    } catch (e) {
+      console.error('Error subiendo evidencia:', e);
     }
-      */
+  }
+}
 
     // Mostrar código
     document.getElementById('codigo-display').textContent = data.codigo;
