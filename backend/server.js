@@ -7,7 +7,14 @@ const path = require('path');
 const app = express();
 
 // Middlewares globales
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://grupo1-espro-v01.github.io',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
