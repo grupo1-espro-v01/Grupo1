@@ -104,23 +104,36 @@ const consultarPorCodigo = async (req, res) => {
   }
 };
 
+const { enviarNotificacionCambioEstado } = require('../utils/mailer');
+
 // PATCH /api/denuncias/:id/estado — cambiar estado
 const cambiarEstado = async (req, res) => {
   try {
     const { id } = req.params;
     const { estado } = req.body;
 
-    const estadosValidos = ['Nueva','Asignada','En Investigacion','Resuelta','Archivada'];
+    const estadosValidos = ['Nueva', 'Asignada', 'En Investigacion', 'Resuelta', 'Archivada'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({ error: 'Estado inválido.' });
     }
 
+    // Actualizar el estado
     await pool.query('UPDATE denuncias SET estado = ? WHERE id = ?', [estado, id]);
 
+    // Registrar en auditoría
     await pool.query(
       'INSERT INTO audit_logs (usuario_id, accion, denuncia_id, detalles_json) VALUES (?, ?, ?, ?)',
       [req.usuario.id, 'CAMBIO_ESTADO', id, JSON.stringify({ estado })]
     );
+
+    // === OBTENER LA DENUNCIA COMPLETA PARA ENVIAR CORREO ===
+    const [denuncias] = await pool.query('SELECT * FROM denuncias WHERE id = ?', [id]);
+    const denuncia = denuncias[0];
+
+    // === ENVIAR NOTIFICACIÓN POR CORREO ===
+    if (denuncia) {
+      await enviarNotificacionCambioEstado(denuncia, estado);
+    }
 
     res.json({ mensaje: `Estado actualizado a: ${estado}` });
 
