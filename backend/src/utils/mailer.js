@@ -3,14 +3,19 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
-  secure: false, // false para puerto 587
+  secure: false,                    // STARTTLS
+  requireTLS: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
   tls: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+    ciphers: 'SSLv3'
+  },
+  connectionTimeout: 10000,         // 10 segundos
+  greetingTimeout: 10000,
+  socketTimeout: 15000
 });
 
 async function enviarNotificacionCambioEstado(denuncia, nuevoEstado) {
@@ -66,7 +71,8 @@ async function enviarNotificacionCambioEstado(denuncia, nuevoEstado) {
     await transporter.sendMail(mailOptions);
     console.log(`✅ Correo enviado a ${denuncia.correo_electronico} - Estado: ${nuevoEstado}`);
   } catch (error) {
-    console.error('❌ Error enviando correo:', error.message);
+    console.error('❌ Error enviando correo con Gmail:', error.message);
+    // No lanzamos el error para que no falle el cambio de estado
   }
 }
 
