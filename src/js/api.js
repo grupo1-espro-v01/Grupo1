@@ -88,6 +88,7 @@ const Denuncias = {
   consultarPublico: (codigo) => get(`/denuncias/consulta/${codigo}`),
   cambiarEstado: (id, estado) => patch(`/denuncias/${id}/estado`, { estado }),
   asignar: (id, investigador_id) => post(`/denuncias/${id}/asignar`, { investigador_id }),
+  misAsignadas: () => get('/denuncias/mis-asignadas'),
 };
 
 const Evidencias = {

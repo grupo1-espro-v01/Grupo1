@@ -143,4 +143,22 @@ const cambiarEstado = async (req, res) => {
   }
 };
 
+// GET /api/denuncias/mis-asignadas — casos asignados al investigador actual
+const listarMisAsignadas = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT d.* 
+       FROM denuncias d
+       INNER JOIN asignaciones a ON d.id = a.denuncia_id
+       WHERE a.investigador_id = ?
+       ORDER BY d.fecha_presentacion DESC`,
+      [req.usuario.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+};
+
 module.exports = { registrar, listar, consultarPorCodigo, cambiarEstado };

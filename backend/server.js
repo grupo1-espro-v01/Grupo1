@@ -36,6 +36,8 @@ const usuariosRoutes = require('./src/routes/usuariosRoutes');
 app.use('/api/usuarios', usuariosRoutes);
 const reportesRoutes = require('./src/routes/reportesRoutes');
 app.use('/api/reportes', reportesRoutes);
+const comentariosRoutes = require('./src/routes/comentariosRoutes');
+app.use('/api/comentarios', comentariosRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
