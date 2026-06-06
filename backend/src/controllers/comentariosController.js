@@ -9,7 +9,7 @@ const listarComentarios = async (req, res) => {
        FROM comentarios c
        LEFT JOIN usuarios u ON c.usuario_id = u.id
        WHERE c.denuncia_id = ?
-       ORDER BY c.creado_en DESC`,     // ← Cambiado a creado_en
+       ORDER BY c.fecha DESC`,           // ← CORREGIDO: usa "fecha"
       [denuncia_id]
     );
     res.json(rows);
@@ -22,7 +22,7 @@ const listarComentarios = async (req, res) => {
 // POST /api/comentarios
 const crearComentario = async (req, res) => {
   try {
-    const { denuncia_id, texto } = req.body;   // ← Quitamos 'tipo'
+    const { denuncia_id, texto } = req.body;
 
     if (!denuncia_id || !texto) {
       return res.status(400).json({ error: 'denuncia_id y texto son obligatorios.' });
@@ -30,7 +30,7 @@ const crearComentario = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO comentarios (denuncia_id, usuario_id, texto)
-       VALUES (?, ?, ?)`,                    // ← Sin columna 'tipo'
+       VALUES (?, ?, ?)`,
       [denuncia_id, req.usuario.id, texto]
     );
 
