@@ -104,12 +104,48 @@ async function cargarMisCasos() {
   }
 }
 
-// Ver detalle + cargar notas
+// Ver detalle del caso + evidencias
 async function verDetalle(id) {
   try {
     const todas = await Denuncias.listar();
     casoActual = todas.find(d => d.id === id);
     if (!casoActual) return;
+
+    // Cargar evidencias del caso
+    let evidenciasHTML = '';
+    try {
+      const evidencias = await Evidencias.listar(id);
+      
+      if (evidencias.length > 0) {
+        evidenciasHTML = `<div style="margin-top:20px;"><strong>Evidencias:</strong><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">`;
+        
+        evidencias.forEach(ev => {
+          const esImagen = ['JPG','JPEG','PNG','GIF'].includes(ev.tipo?.toUpperCase());
+          
+          if (esImagen) {
+            evidenciasHTML += `
+              <div>
+                <a href="${ev.archivo_url}" target="_blank">
+                  <img src="${ev.archivo_url}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid #ddd;object-fit:cover;">
+                </a>
+              </div>`;
+          } else {
+            evidenciasHTML += `
+              <div style="padding:10px;border:1px solid #ddd;border-radius:8px;">
+                <a href="${ev.archivo_url}" target="_blank" style="color:#C0392B;text-decoration:none;">
+                  📄 ${ev.tipo || 'Archivo'} 
+                </a>
+              </div>`;
+          }
+        });
+        
+        evidenciasHTML += `</div></div>`;
+      } else {
+        evidenciasHTML = `<p style="color:var(--text-muted);margin-top:10px;">Este caso aún no tiene evidencias.</p>`;
+      }
+    } catch (e) {
+      evidenciasHTML = `<p style="color:red;">Error al cargar evidencias.</p>`;
+    }
 
     const modalBody = document.getElementById('modal-body');
     modalBody.innerHTML = `
@@ -118,10 +154,14 @@ async function verDetalle(id) {
         <div class="result-row"><span class="lbl">Estado</span><span>${Utils.estadoBadge(casoActual.estado)}</span></div>
         <div class="result-row"><span class="lbl">Categoría</span><span>${casoActual.categoria}</span></div>
         <div class="result-row"><span class="lbl">Gravedad</span><span>${Utils.gravedad(casoActual.gravedad)}</span></div>
+        <div class="result-row"><span class="lbl">Fecha</span><span>${Utils.formatFecha(casoActual.fecha_presentacion)}</span></div>
+        
         <div style="margin-top:16px;">
           <div style="font-weight:600;margin-bottom:6px;">Descripción</div>
           <div style="background:#f8f9fa;padding:12px;border-radius:8px;white-space:pre-wrap;">${casoActual.descripcion}</div>
         </div>
+
+        ${evidenciasHTML}
       </div>
     `;
 
@@ -130,6 +170,7 @@ async function verDetalle(id) {
 
   } catch (err) {
     console.error(err);
+    alert('Error al cargar el detalle del caso.');
   }
 }
 
