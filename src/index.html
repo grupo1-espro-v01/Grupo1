@@ -3,110 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Denuncias — Iniciar Sesión</title>
+  <title>Sistema de Denuncias — Fiscalía General de la República</title>
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 17px;
+      max-width: 620px;
+      margin: 0 auto;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.6;
+    }
+    .action-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+    .action-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 28px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+    .action-card h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: var(--navy);
+    }
+    .action-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .section {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+    .section h2 {
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+    .staff-access {
+      text-align: center;
+      margin: 60px 0 40px;
+    }
+    .staff-access a {
+      color: var(--text-muted);
+      font-size: 14px;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-<div class="login-page">
-  <!-- Lado izquierdo decorativo -->
-  <div class="login-left">
-    <div class="login-shield">🛡️</div>
-    <h1>Sistema de Denuncias y Seguimiento</h1>
-    <p>Plataforma segura para la gestión de denuncias ciudadanas con trazabilidad completa y protección del denunciante.</p>
-    <div class="login-tags">
-      <span class="login-tag">🔒 Anonimato garantizado</span>
-      <span class="login-tag">📋 Trazabilidad total</span>
-      <span class="login-tag">⚡ Notificaciones automáticas</span>
-      <span class="login-tag">🏛️ FGR El Salvador</span>
-    </div>
+
+<!-- HEADER -->
+<div style="background:var(--navy);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;">
+  <div style="display:flex;align-items:center;gap:10px;color:#fff;font-weight:700;font-size:17px;">
+    <span style="background:var(--red);padding:6px 11px;border-radius:8px;">🛡️</span>
+    Fiscalía General de la República
+  </div>
+  <div>
+    <a href="denuncia.html" style="color:#90CDF4;font-weight:600;font-size:14px;text-decoration:none;">Registrar Denuncia</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Sistema de Denuncias en Línea</h1>
+  <p>
+    Plataforma oficial de la Fiscalía General de la República de El Salvador 
+    para la recepción y seguimiento de denuncias ciudadanas de forma segura y confidencial.
+  </p>
+</div>
+
+<!-- ACCIONES PRINCIPALES -->
+<div class="action-cards">
+  <!-- Tarjeta 1 -->
+  <div class="action-card">
+    <h3>📝 Registrar una Denuncia</h3>
+    <p>
+      Presente su denuncia de manera segura. Puede hacerlo de forma anónima 
+      y recibirá un código único para dar seguimiento a su caso.
+    </p>
+    <a href="denuncia.html" class="btn btn-primary btn-lg" style="width:100%;">Registrar Denuncia</a>
   </div>
 
-  <!-- Formulario de login -->
-  <div class="login-right">
-    <h2>Iniciar Sesión</h2>
-    <p class="subtitle">Acceso exclusivo para personal autorizado de la institución.</p>
+  <!-- Tarjeta 2 -->
+  <div class="action-card">
+    <h3>🔍 Consultar Estado de Denuncia</h3>
+    <p>
+      Si ya presentó una denuncia, puede consultar el estado actual 
+      de su caso ingresando el código que se le proporcionó.
+    </p>
+    <a href="consulta.html" class="btn btn-outline btn-lg" style="width:100%;">Consultar Estado</a>
+  </div>
+</div>
 
-    <div id="alert-login" class="alert alert-error hidden" role="alert"></div>
+<!-- INFORMACIÓN BREVE -->
+<div class="section">
+  <h2>¿Qué es este sistema?</h2>
+  <p style="color:var(--text-muted);font-size:15.5px;line-height:1.7;max-width:680px;margin:0 auto;">
+    Este es el canal oficial digital de la Fiscalía General de la República para recibir denuncias 
+    de la población. Garantizamos la confidencialidad de su información y un proceso transparente 
+    conforme a la ley.
+  </p>
+</div>
 
-    <div class="form-group">
-      <label for="usuario" class="required">Usuario</label>
-      <input type="text" id="usuario" class="form-control" placeholder="Ingrese su usuario" autocomplete="username">
-      <div class="field-error hidden" id="err-usuario">El usuario es obligatorio.</div>
+<!-- ACCESO PARA FUNCIONARIOS -->
+<div class="staff-access">
+  <a href="#" onclick="mostrarLogin()">¿Eres funcionario de la FGR? Acceder al sistema</a>
+</div>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:30px 20px;color:var(--text-muted);font-size:13px;border-top:1px solid var(--border);">
+  Fiscalía General de la República de El Salvador — Sistema de Denuncias Ciudadanas<br>
+  Para emergencias llame al <strong>911</strong>
+</div>
+
+<!-- MODAL DE LOGIN -->
+<div id="login-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:300;">
+  <div style="background:white;border-radius:12px;padding:32px;width:100%;max-width:380px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 style="margin:0;color:var(--navy);">Acceso de Funcionarios</h3>
+      <button onclick="cerrarLogin()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666;">&times;</button>
     </div>
 
+    <div id="login-alert" class="alert hidden" style="margin-bottom:16px;"></div>
+
     <div class="form-group">
-      <label for="password" class="required">Contraseña</label>
-      <input type="password" id="password" class="form-control" placeholder="Ingrese su contraseña" autocomplete="current-password">
-      <div class="field-error hidden" id="err-password">La contraseña es obligatoria.</div>
+      <label>Correo electrónico</label>
+      <input type="email" id="login-email" class="form-control" placeholder="correo@fgr.gob.sv">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="login-password" class="form-control" placeholder="••••••••">
     </div>
 
-    <button class="btn btn-primary w-full btn-lg" onclick="doLogin()" id="btn-login">
-      🔐 Iniciar Sesión
+    <button onclick="iniciarSesion()" class="btn btn-primary btn-lg" style="width:100%;margin-top:10px;">
+      Iniciar Sesión
     </button>
 
-    <div class="login-link mt-md">
-      ¿Desea consultar el estado de su denuncia?
-      <a href="consulta.html">Consulta pública →</a>
-    </div>
-
-    <div class="login-link mt-md">
-        ¿Desea presentar una denuncia?
-        <a href="denuncia.html">Portal ciudadano →</a>
-    </div>
-
-    <div class="demo-users">
-      <strong>Usuarios de prueba</strong>
-      <div>👤 Admin: <b>admin@fgr.gob.sv</b> / Admin123!</div>
-      <div>📋 Recepción: <b>fiscal1@fgr.gob.sv</b> / Fiscal123!</div>
-      <div>🔍 Investigador: <b>investigador1@fgr.gob.sv</b> / Invest123!</div>
-    </div>
+    <p style="text-align:center;font-size:12px;color:#888;margin-top:20px;">
+      Este acceso es exclusivo para personal autorizado de la FGR.
+    </p>
   </div>
 </div>
 
 <script src="js/api.js"></script>
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const usr = Auth.currentUser();
-    if (usr) {
-      window.location.href = usr.rol === 'recepcion' ? 'recepcion.html' : 'admin.html';
-    }
-  });
+function mostrarLogin() {
+  document.getElementById('login-modal').classList.remove('hidden');
+  document.getElementById('login-alert').classList.add('hidden');
+}
 
-  async function doLogin() {
-    const email    = document.getElementById('usuario').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const alertEl  = document.getElementById('alert-login');
+function cerrarLogin() {
+  document.getElementById('login-modal').classList.add('hidden');
+}
 
-    document.getElementById('err-usuario').classList.add('hidden');
-    document.getElementById('err-password').classList.add('hidden');
-    alertEl.classList.add('hidden');
+async function iniciarSesion() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  const alertBox = document.getElementById('login-alert');
 
-    if (!email)    { document.getElementById('err-usuario').classList.remove('hidden'); return; }
-    if (!password) { document.getElementById('err-password').classList.remove('hidden'); return; }
+  alertBox.classList.add('hidden');
 
-    try {
-      const data = await Auth.login(email, password);
-      alertEl.className = 'alert alert-success';
-      alertEl.textContent = `✅ Bienvenido, ${data.usuario.nombre}. Redirigiendo...`;
-      alertEl.classList.remove('hidden');
-      setTimeout(() => {
-        window.location.href = data.usuario.rol === 'recepcion' ? 'recepcion.html' : 'admin.html';
-      }, 900);
-    } catch (err) {
-      alertEl.className = 'alert alert-error';
-      alertEl.textContent = `❌ ${err.message}`;
-      alertEl.classList.remove('hidden');
-    }
+  if (!email || !password) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = 'Por favor complete todos los campos.';
+    alertBox.classList.remove('hidden');
+    return;
   }
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doLogin();
-  });
+  try {
+    await Auth.login(email, password);
+    window.location.href = 'src/recepcion.html'; // o la página según el rol
+  } catch (err) {
+    alertBox.className = 'alert alert-error';
+    alertBox.textContent = err.message || 'Credenciales incorrectas.';
+    alertBox.classList.remove('hidden');
+  }
+}
 
-  // Enter para submit
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doLogin();
-  });
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === "Escape") {
+    document.getElementById('login-modal').classList.add('hidden');
+  }
+});
 </script>
+
 </body>
 </html>
