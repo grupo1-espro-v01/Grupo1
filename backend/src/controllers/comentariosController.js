@@ -1,6 +1,6 @@
 const pool = require('../config/database');
 
-// GET /api/comentarios/:denuncia_id — listar comentarios de una denuncia
+// GET /api/comentarios/:denuncia_id
 const listarComentarios = async (req, res) => {
   try {
     const { denuncia_id } = req.params;
@@ -9,7 +9,7 @@ const listarComentarios = async (req, res) => {
        FROM comentarios c
        LEFT JOIN usuarios u ON c.usuario_id = u.id
        WHERE c.denuncia_id = ?
-       ORDER BY c.fecha_creacion DESC`,
+       ORDER BY c.creado_en DESC`,     // ← Cambiado a creado_en
       [denuncia_id]
     );
     res.json(rows);
@@ -19,19 +19,19 @@ const listarComentarios = async (req, res) => {
   }
 };
 
-// POST /api/comentarios — agregar comentario/nota
+// POST /api/comentarios
 const crearComentario = async (req, res) => {
   try {
-    const { denuncia_id, texto, tipo } = req.body; // tipo: 'nota_investigador', 'comentario_general', etc.
+    const { denuncia_id, texto } = req.body;   // ← Quitamos 'tipo'
 
     if (!denuncia_id || !texto) {
       return res.status(400).json({ error: 'denuncia_id y texto son obligatorios.' });
     }
 
     const [result] = await pool.query(
-      `INSERT INTO comentarios (denuncia_id, usuario_id, texto, tipo)
-       VALUES (?, ?, ?, ?)`,
-      [denuncia_id, req.usuario.id, texto, tipo || 'nota_investigador']
+      `INSERT INTO comentarios (denuncia_id, usuario_id, texto)
+       VALUES (?, ?, ?)`,                    // ← Sin columna 'tipo'
+      [denuncia_id, req.usuario.id, texto]
     );
 
     res.status(201).json({
