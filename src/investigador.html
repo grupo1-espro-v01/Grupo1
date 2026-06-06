@@ -181,15 +181,22 @@ function cerrarModal() {
 
 // Cargar notas reales desde el backend
 async function cargarNotas(denuncia_id) {
-  try {
-    const notas = await fetch(`https://grupo1-production-a2cc.up.railway.app/api/comentarios/${denuncia_id}`, {
-      headers: { 'Authorization': `Bearer ${Auth.token()}` }
-    }).then(r => r.json());
+  const container = document.getElementById('notas-container');
+  container.innerHTML = `<p style="color:var(--text-muted);font-size:13px;">Cargando notas...</p>`;
 
-    const container = document.getElementById('notas-container');
+  try {
+    const res = await fetch(`https://grupo1-production-a2cc.up.railway.app/api/comentarios/${denuncia_id}`, {
+      headers: { 'Authorization': `Bearer ${Auth.token()}` }
+    });
+
+    if (!res.ok) {
+      throw new Error('Error al obtener notas del servidor');
+    }
+
+    const notas = await res.json();
     container.innerHTML = '';
 
-    if (notas.length === 0) {
+    if (!notas || notas.length === 0) {
       container.innerHTML = `<p style="color:var(--text-muted);font-size:13px;">Aún no hay notas en este caso.</p>`;
       return;
     }
@@ -201,13 +208,14 @@ async function cargarNotas(denuncia_id) {
         <div style="font-size:12px;color:#666;margin-bottom:4px;">
           <strong>${nota.nombre || 'Investigador'}</strong> • ${new Date(nota.fecha_creacion).toLocaleString('es-SV')}
         </div>
-        <div>${nota.texto}</div>
+        <div style="white-space:pre-wrap;">${nota.texto}</div>
       `;
       container.appendChild(div);
     });
 
   } catch (err) {
     console.error(err);
+    container.innerHTML = `<p style="color:red;font-size:13px;">Error al cargar las notas. Revisa la consola.</p>`;
   }
 }
 
@@ -217,7 +225,7 @@ async function agregarNota() {
   if (!texto || !casoActual) return;
 
   try {
-    await fetch('https://grupo1-production-a2cc.up.railway.app/api/comentarios', {
+    const res = await fetch('https://grupo1-production-a2cc.up.railway.app/api/comentarios', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -230,12 +238,18 @@ async function agregarNota() {
       })
     });
 
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Error al guardar la nota');
+    }
+
+    // Si llegó aquí, la nota se guardó correctamente
     document.getElementById('nueva-nota').value = '';
     await cargarNotas(casoActual.id); // recargar notas
 
   } catch (err) {
-    alert('Error al guardar la nota.');
     console.error(err);
+    alert('Error al guardar la nota: ' + err.message);
   }
 }
 
