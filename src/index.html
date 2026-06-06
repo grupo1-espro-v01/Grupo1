@@ -197,15 +197,30 @@ async function iniciarSesion() {
   }
 
   try {
-    await Auth.login(email, password);
-    window.location.href = 'recepcion.html'; // o la página según el rol
+    const data = await Auth.login(email, password); // ← guardamos la respuesta
+
+    // Redirección según el rol
+    const rol = data.usuario.rol;
+
+    if (rol === 'admin') {
+      window.location.href = 'admin.html';
+    } 
+    else if (rol === 'recepcion') {
+      window.location.href = 'recepcion.html';
+    } 
+    else if (rol === 'investigador') {
+      window.location.href = 'recepcion.html'; // o crea un investigador.html si tienes
+    } 
+    else {
+      window.location.href = 'recepcion.html'; // fallback
+    }
+
   } catch (err) {
     alertBox.className = 'alert alert-error';
     alertBox.textContent = err.message || 'Credenciales incorrectas.';
     alertBox.classList.remove('hidden');
   }
 }
-
 // Cerrar modal con Escape
 document.addEventListener('keydown', function(e) {
   if (e.key === "Escape") {
