@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale:1.0">
   <title>Registrar Denuncia — FGR El Salvador</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -14,25 +14,17 @@
     <span style="background:var(--red);padding:6px 10px;border-radius:8px;">🛡️</span>
     Sistema de Denuncias — FGR El Salvador
   </div>
-  <div style="display:flex;gap:16px;">
-    <a href="consulta.html" style="color:#90CDF4;font-size:13px;font-weight:600;">🔍 Consultar mi denuncia</a>
-    <a href="index.html" style="color:#90CDF4;font-size:13px;font-weight:600;">🔐 Acceso funcionarios</a>
-  </div>
+  <a href="index.html" style="color:#90CDF4;font-size:13px;font-weight:600;text-decoration:none;">
+    ← Volver al inicio
+  </a>
 </div>
 
 <!-- HERO -->
-<div style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:48px 28px;text-align:center;color:#fff;">
-  <h1 style="font-size:28px;font-weight:700;margin-bottom:12px;">Registre su Denuncia de Forma Segura</h1>
-  <p style="font-size:15px;color:rgba(255,255,255,.8);max-width:600px;margin:0 auto;line-height:1.7;">
+<div style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:42px 28px;text-align:center;color:#fff;">
+  <h1 style="font-size:26px;font-weight:700;margin-bottom:10px;">Registre su Denuncia de Forma Segura</h1>
+  <p style="font-size:15px;color:rgba(255,255,255,.85);max-width:620px;margin:0 auto;line-height:1.6;">
     Su información está protegida. Puede denunciar de forma anónima si lo prefiere.
-    Recibirá un código único para dar seguimiento a su caso.
   </p>
-  <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">🔒 Anonimato garantizado</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">📋 Código de seguimiento</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">⚡ Respuesta en 48 horas</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;">🏛️ FGR El Salvador</span>
-  </div>
 </div>
 
 <!-- FORMULARIO -->
@@ -43,9 +35,10 @@
 
   <!-- Código generado -->
   <div id="codigo-generado" class="hidden" style="background:#D1FAE5;border:2px solid #34D399;border-radius:12px;padding:24px;text-align:center;margin-bottom:20px;">
-    <div style="font-size:18px;font-weight:700;color:#065F46;margin-bottom:8px;">✅ ¡Denuncia registrada exitosamente!</div>
-    <div style="font-size:14px;color:#047857;margin-bottom:12px;">Guarde este código para dar seguimiento a su caso:</div>
-    <div id="codigo-display" style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:700;color:#065F46;background:#fff;padding:12px 24px;border-radius:8px;display:inline-block;border:2px dashed #34D399;letter-spacing:.1em;"></div>
+    <div style="font-size:17px;font-weight:700;color:#065F46;margin-bottom:8px;">✅ ¡Denuncia registrada exitosamente!</div>
+    <div style="font-size:14px;color:#047857;margin-bottom:10px;">Guarde este código para dar seguimiento a su caso:</div>
+    <div id="codigo-display" style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:700;color:#065F46;background:#fff;padding:10px 22px;border-radius:8px;display:inline-block;border:2px dashed #34D399;letter-spacing:.08em;"></div>
+    
     <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button onclick="copiarCodigo()" class="btn btn-success btn-sm">📋 Copiar código</button>
       <a href="consulta.html" class="btn btn-outline btn-sm">🔍 Consultar estado</a>
@@ -62,9 +55,10 @@
       🔒 Deseo denunciar de forma anónima — No se solicitarán mis datos personales
     </label>
 
-    <!-- Datos personales -->
+    <!-- Datos del denunciante -->
     <div id="bloque-identidad">
-      <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Datos del denunciante</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Datos del denunciante</div>
+      
       <div class="form-grid-2">
         <div class="form-group">
           <label for="nombre" class="required">Nombre Completo</label>
@@ -88,13 +82,13 @@
       </div>
     </div>
 
-    <!-- Datos de la denuncia -->
-    <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;margin-top:8px;">Información de la denuncia</div>
+    <!-- Información de la denuncia -->
+    <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 10px;">Información de la denuncia</div>
 
     <div class="form-group">
       <label for="descripcion" class="required">Descripción de los Hechos</label>
       <textarea id="descripcion" class="form-control" rows="5"
-        placeholder="Describa detalladamente los hechos que desea denunciar. Incluya fechas, lugares, personas involucradas y cualquier información relevante..."></textarea>
+        placeholder="Describa detalladamente los hechos que desea denunciar (fechas, lugares, personas involucradas, etc.)"></textarea>
       <div class="field-error hidden" id="err-descripcion">La descripción es obligatoria (mínimo 20 caracteres).</div>
       <div id="char-count" style="font-size:11px;color:var(--text-muted);margin-top:4px;">0 caracteres</div>
     </div>
@@ -108,8 +102,8 @@
           <option>Familiar / Violencia</option>
           <option>Penal / Delitos</option>
           <option>Derechos Humanos</option>
-          <option>Atencion Psicosocial</option>
-          <option>Corrupcion / Fraude</option>
+          <option>Atención Psicosocial</option>
+          <option>Corrupción / Fraude</option>
           <option>Otra</option>
         </select>
         <div class="field-error hidden" id="err-categoria">Seleccione una categoría.</div>
@@ -130,15 +124,20 @@
       <label>Evidencias <span style="color:var(--text-muted);font-size:11px;">(opcional)</span></label>
       <input type="file" id="evidencias" class="form-control" multiple accept=".jpg,.jpeg,.png,.pdf,.mp4,.mp3,.wav">
       <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
-        Formatos aceptados: JPG, PNG, PDF, MP4, MP3, WAV — Máximo 10 MB por archivo
+        Formatos: JPG, PNG, PDF, MP4, MP3, WAV — Máx. 10 MB por archivo
       </div>
     </div>
 
+    <!-- Aviso de emergencia -->
+    <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:14px;margin:16px 0;font-size:13px;color:#92400E;line-height:1.6;">
+      <strong>⚠️ En caso de emergencia:</strong> Si su vida o integridad está en riesgo, 
+      llame inmediatamente al <strong>911</strong>. Si es mujer y sufre violencia, puede contactar la <strong>Línea 126</strong>.
+    </div>
+
     <!-- Aviso legal -->
-    <div style="background:#FEF9E7;border:1px solid #F9E79F;border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:#7D6608;line-height:1.7;">
-      ⚠️ <strong>Aviso legal:</strong> Al enviar esta denuncia, declara que la información proporcionada es verídica.
-      Las denuncias falsas pueden tener consecuencias legales. Su información será tratada con estricta confidencialidad
-      conforme a la Ley de Protección de Datos Personales de El Salvador.
+    <div style="background:#FEF9E7;border:1px solid #F9E79F;border-radius:8px;padding:13px;margin-bottom:16px;font-size:12px;color:#7D6608;line-height:1.65;">
+      ⚠️ <strong>Aviso legal:</strong> Al enviar esta denuncia declara que la información es verídica. 
+      Las denuncias falsas pueden tener consecuencias legales.
     </div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -151,25 +150,35 @@
 </div>
 
 <!-- FOOTER -->
-<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:12px;margin-top:20px;">
-  🏛️ Fiscalía General de la República de El Salvador — Sistema de Denuncias Ciudadanas
-  <br>Para emergencias llame al <strong>911</strong>
+<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px;margin-top:10px;">
+  Fiscalía General de la República de El Salvador — Sistema de Denuncias Ciudadanas
 </div>
 
 <script src="js/api.js"></script>
 <script>
 let codigoGenerado = null;
 
-function toggleAnonima() {
-  const anonima = document.getElementById('chk-anonima').checked;
-  document.getElementById('bloque-identidad').style.opacity = anonima ? '.35' : '1';
-  document.getElementById('bloque-identidad').style.pointerEvents = anonima ? 'none' : '';
-}
+// === FORMATO AUTOMÁTICO DEL DUI ===
+const duiInput = document.getElementById('dui');
+duiInput.addEventListener('input', function() {
+  let value = this.value.replace(/\D/g, ''); // Solo números
+  if (value.length > 9) value = value.slice(0, 9);
+  if (value.length > 8) {
+    value = value.slice(0, 8) + '-' + value.slice(8);
+  }
+  this.value = value;
+});
 
 // Contador de caracteres
 document.getElementById('descripcion').addEventListener('input', function() {
   document.getElementById('char-count').textContent = `${this.value.length} caracteres`;
 });
+
+function toggleAnonima() {
+  const anonima = document.getElementById('chk-anonima').checked;
+  document.getElementById('bloque-identidad').style.opacity = anonima ? '.35' : '1';
+  document.getElementById('bloque-identidad').style.pointerEvents = anonima ? 'none' : '';
+}
 
 function clearErrors() {
   document.querySelectorAll('.field-error').forEach(e => e.classList.add('hidden'));
@@ -209,8 +218,6 @@ async function enviarDenuncia() {
   btn.disabled = true;
 
   try {
-    // Para denuncias públicas usamos un usuario fiscal por defecto
-    // El backend necesita un endpoint público para esto
     const res = await fetch('https://grupo1-production-a2cc.up.railway.app/api/denuncias/publica', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -228,24 +235,24 @@ async function enviarDenuncia() {
 
     codigoGenerado = data.codigo;
 
-// Subir evidencias si hay
-const archivos = document.getElementById('evidencias').files;
-if (archivos.length > 0) {
-  for (const archivo of archivos) {
-    const formData = new FormData();
-    formData.append('archivo', archivo);
-    try {
-      await fetch(`https://grupo1-production-a2cc.up.railway.app/api/evidencias/publica/${data.id}`, {
-        method: 'POST',
-        body: formData
-      });
-    } catch (e) {
-      console.error('Error subiendo evidencia:', e);
+    // Subir evidencias
+    const archivos = document.getElementById('evidencias').files;
+    if (archivos.length > 0) {
+      for (const archivo of archivos) {
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+        try {
+          await fetch(`https://grupo1-production-a2cc.up.railway.app/api/evidencias/publica/${data.id}`, {
+            method: 'POST',
+            body: formData
+          });
+        } catch (e) {
+          console.error('Error subiendo evidencia:', e);
+        }
+      }
     }
-  }
-}
 
-    // Mostrar código
+    // Mostrar éxito
     document.getElementById('codigo-display').textContent = data.codigo;
     document.getElementById('codigo-generado').classList.remove('hidden');
     document.getElementById('formulario-container').classList.add('hidden');
@@ -279,7 +286,7 @@ function limpiarFormulario() {
     document.getElementById(id).value = '';
   });
   document.getElementById('categoria').value = '';
-  document.getElementById('gravedad').value  = '';
+  document.getElementById('gravedad').value = '';
   document.getElementById('chk-anonima').checked = false;
   document.getElementById('char-count').textContent = '0 caracteres';
   toggleAnonima();
