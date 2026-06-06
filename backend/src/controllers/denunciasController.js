@@ -143,7 +143,7 @@ const cambiarEstado = async (req, res) => {
   }
 };
 
-// GET /api/denuncias/mis-asignadas — casos asignados al investigador actual
+// GET /api/denuncias/mis-asignadas — solo casos asignados al investigador actual
 const listarMisAsignadas = async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -161,4 +161,4 @@ const listarMisAsignadas = async (req, res) => {
   }
 };
 
-module.exports = { registrar, listar, consultarPorCodigo, cambiarEstado };
+module.exports = { registrar, listar, consultarPorCodigo, cambiarEstado, listarMisAsignadas };

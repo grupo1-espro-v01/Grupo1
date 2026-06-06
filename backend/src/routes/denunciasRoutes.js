@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registrar, listar, consultarPorCodigo, cambiarEstado } = require('../controllers/denunciasController');
+const { registrar, listar, consultarPorCodigo, cambiarEstado, listarMisAsignadas } = require('../controllers/denunciasController');
 const { verificarToken, soloRoles } = require('../middlewares/auth');
 
 // Pública — sin token
@@ -17,5 +17,7 @@ router.post('/publica', async (req, res) => {
   const { registrar } = require('../controllers/denunciasController');
   return registrar(req, res);
 });
+
+router.get('/mis-asignadas', verificarToken, soloRoles('investigador'), listarMisAsignadas);
 
 module.exports = router;
