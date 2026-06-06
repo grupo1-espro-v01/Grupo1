@@ -202,16 +202,17 @@ async function cargarNotas(denuncia_id) {
     }
 
     notas.forEach(nota => {
-      const div = document.createElement('div');
-      div.className = 'note';
-      div.innerHTML = `
-        <div style="font-size:12px;color:#666;margin-bottom:4px;">
-          <strong>${nota.nombre || 'Investigador'}</strong> • ${new Date(nota.fecha_creacion).toLocaleString('es-SV')}
-        </div>
-        <div style="white-space:pre-wrap;">${nota.texto}</div>
-      `;
-      container.appendChild(div);
-    });
+  const div = document.createElement('div');
+  div.className = 'note';
+  div.innerHTML = `
+    <div style="font-size:12px;color:#666;margin-bottom:4px;">
+      <strong>${nota.nombre || 'Investigador'}</strong> • 
+      ${nota.fecha ? new Date(nota.fecha).toLocaleString('es-SV') : 'Fecha no disponible'}
+    </div>
+    <div style="white-space:pre-wrap;">${nota.texto}</div>
+  `;
+  container.appendChild(div);
+});
 
   } catch (err) {
     console.error(err);
