@@ -198,7 +198,7 @@ async function iniciarSesion() {
 
   try {
     await Auth.login(email, password);
-    window.location.href = 'src/recepcion.html'; // o la página según el rol
+    window.location.href = 'recepcion.html'; // o la página según el rol
   } catch (err) {
     alertBox.className = 'alert alert-error';
     alertBox.textContent = err.message || 'Credenciales incorrectas.';
